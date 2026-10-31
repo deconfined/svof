@@ -1,1 +1,0 @@
-svo.lc_shikudohit(matches[2], "head", "highest")

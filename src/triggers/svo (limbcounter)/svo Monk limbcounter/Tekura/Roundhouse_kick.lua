@@ -1,1 +1,0 @@
-svo.lc_hit(multimatches[2][2], "torso", svo.conf.legdamage)

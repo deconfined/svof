@@ -16,16 +16,6 @@
       "name": "Pre-parse anti-illusion"
     },
     {
-      "file": "src/scripts/svo (limbcounter)/svo_limbcounter.lua",
-      "kind": "trigger",
-      "name": "svo Burn limbcounter"
-    },
-    {
-      "file": "src/scripts/svo (limbcounter)/svo_limbcounter.lua",
-      "kind": "trigger",
-      "name": "svolc Don't Register"
-    },
-    {
       "file": "src/scripts/svo (logger)/svo Logger/HTML5_logger.lua",
       "kind": "trigger",
       "name": "Capture each line"

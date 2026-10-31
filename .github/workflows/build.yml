@@ -25,7 +25,7 @@ on:
     # The syntax and call-site gates used to run on every push, from
     # check-syntax.yml. Folding them in here narrowed that to one branch, which
     # left master and in-client-svof with no check at all.
-    branches: [svof-muddler, in-client-svof, master]
+    branches: [svof-muddler, in-client-svof, master, percent-limb-tracker]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -363,6 +363,11 @@ jobs:
       # homunculusmercury is svof's swellskin. Read from the real sources.
       - name: test affliction names
         run: lua tools/test_affliction_names.lua
+
+      # Gate 1.995. The limb counter on the real signals and timers: damage from
+      # the game's percentages, the off-balance check, forgetting and cures.
+      - name: test limb counter
+        run: lua tools/test_limbcounter.lua
 
       - uses: actions/setup-java@v4
         with:

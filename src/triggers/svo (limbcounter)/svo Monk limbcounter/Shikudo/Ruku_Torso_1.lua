@@ -1,1 +1,0 @@
-svo.lc_shikudohit(multimatches[1][3], "torso", "highest")

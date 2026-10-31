@@ -1,0 +1,1 @@
+svo.lc_hit(matches.name, matches.limb, tonumber(matches.amount))

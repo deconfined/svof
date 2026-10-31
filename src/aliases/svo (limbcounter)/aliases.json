@@ -10,17 +10,5 @@
     "isActive": "yes",
     "isFolder": "no",
     "regex": "^vsl$"
-  },
-  {
-    "name": "Set the hits needed",
-    "isActive": "yes",
-    "isFolder": "no",
-    "regex": "^shn(?: (\\w+))? ([\\d.]+)$"
-  },
-  {
-    "name": "Syncronize hits",
-    "isActive": "yes",
-    "isFolder": "no",
-    "regex": "^kk$"
   }
 ]

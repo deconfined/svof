@@ -203,9 +203,34 @@
       "text": "Trigger  svo (aliases, triggers) svo/Voicecraft/Crescendo peaks [only in the package]"
     },
     {
+      "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo devastate level 1",
+      "digest": "795dc1fe2b47c4e7",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo devastate level 1 [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo devastate level 2",
+      "digest": "f3100709a778a97f",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo devastate level 2 [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo devastate level 3",
+      "digest": "d83ac2f355da9d5b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo devastate level 3 [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo limb damage",
+      "digest": "6976759b75da1568",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo limb damage [only in the package]"
+    },
+    {
       "id": "count|Alias|svo (aliases, triggers)|svo",
       "digest": "54fafd06c004bb94",
       "text": "Alias    svo (aliases, triggers) / 'svo': 121 items originally, 123 in merged"
+    },
+    {
+      "id": "count|Alias|svo (limbcounter)|svo (limbcounter)",
+      "digest": "83aa4a8e5109ad43",
+      "text": "Alias    svo (limbcounter) / 'svo (limbcounter)': 5 items originally, 3 in merged"
     },
     {
       "id": "count|Script|svo (install me in module manager)|Check for system updates",
@@ -218,9 +243,29 @@
       "text": "Script   svo (install me in module manager) / 'Load & init': 7 items originally, 5 in merged"
     },
     {
+      "id": "count|Script|svo (limbcounter)|svo (limbcounter)",
+      "digest": "7c4cf1e76982a730",
+      "text": "Script   svo (limbcounter) / 'svo (limbcounter)': 3 items originally, 2 in merged"
+    },
+    {
       "id": "count|Trigger|svo (aliases, triggers)|svo",
       "digest": "1baeb8a41ed68579",
       "text": "Trigger  svo (aliases, triggers) / 'svo': 2533 items originally, 2549 in merged"
+    },
+    {
+      "id": "count|Trigger|svo (limbcounter)|svo (limbcounter)",
+      "digest": "d7923f5fab5b5d94",
+      "text": "Trigger  svo (limbcounter) / 'svo (limbcounter)': 88 items originally, 6 in merged"
+    },
+    {
+      "id": "gone|Alias|svo (limbcounter)|svo (limbcounter)/Set the hits needed",
+      "digest": "2000fe4009e9a52f",
+      "text": "Alias    svo (limbcounter) svo (limbcounter)/Set the hits needed [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (limbcounter)|svo (limbcounter)/Syncronize hits",
+      "digest": "5f37cf15889fce47",
+      "text": "Alias    svo (limbcounter) svo (limbcounter)/Syncronize hits [only in the originals]"
     },
     {
       "id": "gone|Script|svo (install me in module manager)|Check for system updates/svo_downloaded_file",
@@ -241,6 +286,11 @@
       "id": "gone|Script|svo (install me in module manager)|Load & init/svo.installed_as_package",
       "digest": "f76b4c01815ab275",
       "text": "Script   svo (install me in module manager) Load & init/svo.installed_as_package [only in the originals]"
+    },
+    {
+      "id": "gone|Script|svo (limbcounter)|svo (limbcounter)/svo count show",
+      "digest": "df90ad0c58b7bd49",
+      "text": "Script   svo (limbcounter) svo (limbcounter)/svo count show [only in the originals]"
     },
     {
       "id": "gone|Trigger|svo (aliases, triggers)|svo/General/Applied salve/svo cure scalded",
@@ -321,6 +371,436 @@
       "id": "gone|Trigger|svo (aliases, triggers)|svo/General/svo no healing balance",
       "digest": "ba5b16a4917e29d8",
       "text": "Trigger  svo (aliases, triggers) svo/General/svo no healing balance [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Dragon limbcounter",
+      "digest": "3a15bc80c52a1aec",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Dragon limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Dragon limbcounter/Guesstimates",
+      "digest": "f45c788ba78a2fb5",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Dragon limbcounter/Guesstimates [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Dragon limbcounter/Rend",
+      "digest": "9bc034c4a62ab10b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Dragon limbcounter/Rend [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter",
+      "digest": "7ebd9d249dd4ccec",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Blunt",
+      "digest": "9a56483f6cc0a82b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Blunt [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Blunt/Whirl (skilfully)",
+      "digest": "0b5ad764900e16cc",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Blunt/Whirl (skilfully) [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Blunt/Whirl (snap)",
+      "digest": "a3acf481cd013704",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Blunt/Whirl (snap) [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Blunt/Whirl (snap) 2",
+      "digest": "9051485314b20727",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Blunt/Whirl (snap) 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Cutting",
+      "digest": "1e559022954d2a05",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Cutting [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Cutting/Quick jab",
+      "digest": "2eb44ec308bc7544",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Cutting/Quick jab [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Cutting/Slash",
+      "digest": "035816fa38e9cd3d",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Cutting/Slash [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Cutting/Swing",
+      "digest": "35e96c0bb868efb2",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Cutting/Swing [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Cutting/Vicious jab",
+      "digest": "00db719770329797",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Cutting/Vicious jab [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Guesstimates",
+      "digest": "a053499cbf4b685d",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Guesstimates [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Sword and Shield",
+      "digest": "d7cbcd1a2deff29c",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Sword and Shield [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Sword and Shield/Rend",
+      "digest": "7c56734a0566b91b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Sword and Shield/Rend [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Sword and Shield/Slice",
+      "digest": "940cf022c9e6f9a4",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Sword and Shield/Slice [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed",
+      "digest": "5e5dc99e57c9754a",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Battlefury Focus",
+      "digest": "ff7c9f4eff2aad95",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Battlefury Focus [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Battlefury Focus/Precision",
+      "digest": "eab9972f64b74354",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Battlefury Focus/Precision [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Battlefury Focus/Speed",
+      "digest": "650f761d28c3e4fe",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Battlefury Focus/Speed [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Devastate",
+      "digest": "a98792a326158fee",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Devastate [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Hew",
+      "digest": "5ae7ab44528c6040",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Hew [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Overhand",
+      "digest": "58d5a4e951f8ee6e",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Overhand [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Pulverize",
+      "digest": "4a7a7e08f935c74f",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Pulverize [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Knight limbcounter/Two handed/Underhand",
+      "digest": "5bb3896ccdefdd00",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Knight limbcounter/Two handed/Underhand [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Magi limbcounter",
+      "digest": "96924b3684222411",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Magi limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Magi limbcounter/Strike",
+      "digest": "6c4af1d6d4ed769c",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Magi limbcounter/Strike [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter",
+      "digest": "e7c263b7b20110f5",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter/Axe throw",
+      "digest": "dc069f1dd4133f59",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter/Axe throw [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter/Gaian fury axe throw",
+      "digest": "aaaef36473acc0e0",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter/Gaian fury axe throw [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter/Hydra",
+      "digest": "9f7004a594c6452a",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter/Hydra [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter/Maul",
+      "digest": "71313324d9f2cca1",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter/Maul [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter/Mounted trip",
+      "digest": "a2eb1350f11caaa6",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter/Mounted trip [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Meta limbcounter/Normal trip",
+      "digest": "b1b39e2c116bc1a7",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Meta limbcounter/Normal trip [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter",
+      "digest": "80593b97e22aeab7",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo",
+      "digest": "5b422e00d831c1aa",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Dart",
+      "digest": "5e914c3336d27f6d",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Dart [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Flashheel",
+      "digest": "fc17321e916b946b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Flashheel [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Frontkick",
+      "digest": "201b6604300c6118",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Frontkick [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Guesstimates",
+      "digest": "8896b4ac02410d93",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Guesstimates [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiraku",
+      "digest": "a8c8215fe3ba322b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiraku [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiraku/Connect",
+      "digest": "0ccdb5cb0c0f9c18",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiraku/Connect [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiru 1",
+      "digest": "a7aebee82cc60d05",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiru 1 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiru 2",
+      "digest": "e0d2535158adee91",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hiru 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hyperfocus",
+      "digest": "f2adac8802017de6",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hyperfocus [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hyperfocus/Hyperfocus off",
+      "digest": "68658c39d6442cdd",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hyperfocus/Hyperfocus off [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Hyperfocus/Hyperfocus on",
+      "digest": "31727a4ec974044e",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Hyperfocus/Hyperfocus on [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Kuro 1",
+      "digest": "3956058683864062",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Kuro 1 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Kuro 2",
+      "digest": "369f31d7019d9f08",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Kuro 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Livestrike",
+      "digest": "ff760b110336ba6b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Livestrike [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Needle",
+      "digest": "561279a4cae1a857",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Needle [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Needle/Connect",
+      "digest": "b3a80ee13aec0ec5",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Needle/Connect [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Nervestrike",
+      "digest": "83381aa015067f4b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Nervestrike [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Risingkick",
+      "digest": "a45187863ebd79cf",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Risingkick [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Risingkick/Head",
+      "digest": "9eb5ca8c38a5e6d0",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Risingkick/Head [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Risingkick/Torso",
+      "digest": "92458ec3746ab118",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Risingkick/Torso [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Arms 1",
+      "digest": "d079aa13b6cad35f",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Arms 1 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Arms 2",
+      "digest": "6df2f2f737c21678",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Arms 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Torso 1",
+      "digest": "fcd45046128d4019",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Torso 1 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Torso 2",
+      "digest": "7a436060d3f21719",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Ruku Torso 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Spinkick",
+      "digest": "dd372e9be1d98b5b",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Spinkick [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Thrust",
+      "digest": "4ae91295171d9511",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Thrust [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Shikudo/Thrust/Connect",
+      "digest": "0fd9a79e5f3dffdb",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Shikudo/Thrust/Connect [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura",
+      "digest": "64b69eb9b8e3f596",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/AXK",
+      "digest": "2c352a86ffc9d898",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/AXK [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Kick",
+      "digest": "536b46f9815cc004",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Kick [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Kick 2",
+      "digest": "dfa7a5462d6cc85d",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Kick 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Kick 3",
+      "digest": "eddc4e3769531e54",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Kick 3 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Kick 4",
+      "digest": "b1cab12bec8da21f",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Kick 4 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Punch",
+      "digest": "b5d8bb70f082ec67",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Punch [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Punch 2",
+      "digest": "d39825553274ee6e",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Punch 2 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Punch 3",
+      "digest": "588ec466aee00962",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Punch 3 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Punch 4",
+      "digest": "e5dc7ab551247f94",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Punch 4 [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Monk limbcounter/Tekura/Roundhouse kick",
+      "digest": "e1984b79911dfa63",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Monk limbcounter/Tekura/Roundhouse kick [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Priest limbcounter",
+      "digest": "e223d1042c0a0e81",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Priest limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Priest limbcounter/Fragility",
+      "digest": "824b7603aa773694",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Priest limbcounter/Fragility [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Priest limbcounter/Guesstimates",
+      "digest": "59017eb69d87e61f",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Priest limbcounter/Guesstimates [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Priest limbcounter/Smite",
+      "digest": "f8eabf3d621e961a",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Priest limbcounter/Smite [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Sylvan limbcounter",
+      "digest": "be43bd0525463e7e",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Sylvan limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo Sylvan limbcounter/Viridian",
+      "digest": "a30cd73b07f8910e",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo Sylvan limbcounter/Viridian [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo earth Elemental Lord limbcounter",
+      "digest": "e763b496f0a9c57a",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo earth Elemental Lord limbcounter [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo earth Elemental Lord limbcounter/Guesstimates",
+      "digest": "1a718a219febdb73",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo earth Elemental Lord limbcounter/Guesstimates [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svo earth Elemental Lord limbcounter/Powderise",
+      "digest": "3b20b6b09cb9f464",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo earth Elemental Lord limbcounter/Powderise [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svolc Don't register",
+      "digest": "41ab0bfe14dd615e",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svolc Don't register [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (limbcounter)|svo (limbcounter)/svolc Don't register 2",
+      "digest": "715e768600870bf7",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svolc Don't register 2 [only in the originals]"
     },
     {
       "id": "item|Alias|svo (aliases, triggers)|svo/(vversion) Show system version|script",
@@ -513,13 +993,8 @@
       "text": "Script   svo (install, config, pipes, rift, parry, prios) Rift [script]"
     },
     {
-      "id": "item|Script|svo (limbcounter)|svo (limbcounter)/svo count show|script",
-      "digest": "4db603064cd308e2",
-      "text": "Script   svo (limbcounter) svo (limbcounter)/svo count show [script]"
-    },
-    {
       "id": "item|Script|svo (limbcounter)|svo (limbcounter)/svo limbcounter|script",
-      "digest": "61d50f9fe357ffa6",
+      "digest": "3900d26c4d5d59da",
       "text": "Script   svo (limbcounter) svo (limbcounter)/svo limbcounter [script]"
     },
     {
@@ -581,6 +1056,11 @@
       "id": "item|Script|svo (setup, misc, empty, funnies, dor)|Empty cure handling|script",
       "digest": "8d3b38ceb54de3a6",
       "text": "Script   svo (setup, misc, empty, funnies, dor) Empty cure handling [script]"
+    },
+    {
+      "id": "item|Script|svo (setup, misc, empty, funnies, dor)|Funnies|script",
+      "digest": "84663dab1cb52b28",
+      "text": "Script   svo (setup, misc, empty, funnies, dor) Funnies [script]"
     },
     {
       "id": "item|Script|svo (setup, misc, empty, funnies, dor)|Miscellaneous functions|script",
@@ -2466,6 +2946,11 @@
       "id": "item|Trigger|svo (fishdist)|svo Fishing Distance by Trilliana/fish!|highlightFg",
       "digest": "456e385a95f1e9e4",
       "text": "Trigger  svo (fishdist) svo Fishing Distance by Trilliana/fish! [highlightFg]"
+    },
+    {
+      "id": "item|Trigger|svo (limbcounter)|svo (limbcounter)/svo target cured limbs|script",
+      "digest": "13e8c7985093003a",
+      "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo target cured limbs [script]"
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/City-House-Order enemies|colorTriggerFgColor",

@@ -209,12 +209,12 @@
     },
     {
       "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo devastate level 2",
-      "digest": "f3100709a778a97f",
+      "digest": "d20a248966128823",
       "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo devastate level 2 [only in the package]"
     },
     {
       "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo devastate level 3",
-      "digest": "d83ac2f355da9d5b",
+      "digest": "c9fd14de36078bfc",
       "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo devastate level 3 [only in the package]"
     },
     {
@@ -994,7 +994,7 @@
     },
     {
       "id": "item|Script|svo (limbcounter)|svo (limbcounter)/svo limbcounter|script",
-      "digest": "3900d26c4d5d59da",
+      "digest": "dd9d8c587c70d666",
       "text": "Script   svo (limbcounter) svo (limbcounter)/svo limbcounter [script]"
     },
     {

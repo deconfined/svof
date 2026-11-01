@@ -2,13 +2,21 @@ Svof Limbcounter
 ======================================
 The limbcounter tracks the limb damage you deal to whoever you hit, from the percentage the game reports with each hit. It works for any class the game reports that for, and tells you the limb's status after each hit, along with any limbs that are prepped.
 
-A limb breaks at 100%, and damage keeps adding up past that, with level 2 at 200% and level 3 at 300%. A limb clears when the person cures it, or after 3 minutes without a hit. A limb counts as prepped when one more hit the size of your last one would break it.
+A limb breaks at 100%, and damage keeps adding up past that. A limb counts as prepped when one more hit the size of your last one would break it.
 
-DEVASTATE doesn't report a percentage. Its line shows the break level, so both limbs of the pair go to that level, and a limb already past it stays where it is.
+A broken limb's level says how many salves it takes to heal:
+
+* Level 1 is broken, with no damage behind it. Mending cures it.
+* Level 2 is damaged, from 100%. Restoration takes the damage away, which leaves level 1.
+* Level 3 is mangled, from 200%. Restoration leaves level 2, at 100%.
+
+Head and torso have no bones to mend, so restoration heals them outright from level 2. Any limb also clears after 3 minutes without a hit.
+
+DEVASTATE doesn't report a percentage. Its line shows the break level, set by wrist fractures for the arms and torn tendons for the legs, and both limbs of the pair go to that level. A limb that was already broken goes a level past where it was, up to level 3.
 
 A hit counts however you sent it: the system, the ``do`` queue, the game's own queue or by hand. Since an illusion can print a damage line, a line only counts if you are off balance or equilibrium at the prompt after it.
 
-A salve line doesn't say which salve was used, so a limb at 100% or more clears 4 seconds after its person is seen applying to it, whatever the salve really was.
+A salve line doesn't say which salve was used, but restoration holds the salve balance until it lands. So a salve counts as restoration if 3.7 seconds pass with no other salve from that person, and it takes one level off the first limb in the area that needs it, left before right. A salve sooner than that means the last one wasn't restoration. Where no limb in the area needs restoration, the salve can only be mending, which acts at once. A lone epidermal on the body still looks like restoration, so it can take a level off the torso.
 
 It also has a feature of showing the last hit opponents limb status on the prompt - to use this, add the *@lc_prompttag*, *@lc_prompttag2* or *@lc_prompttag3* tag to your :ref:`custom prompt<customprompt>`. The tags display the limbs in red when they're broken or prepped.
 
@@ -45,16 +53,19 @@ API
   	This `Mudlet event <http://doc.svo.vadisystems.com/#event-use-examples>`_ goes off when you've hit someone's limb. The event arguments include whom and where did you hit them, and the percentage the hit dealt.
 
   svo limbcounter reset
-  	This event is raised when a limb clears or is reset, or a person is reset. You can then re-read the current *svo.lc_list* table to get the current values.
+  	This event is raised when a limb clears, a cure lands or a limb or person is reset. You can then re-read the current *svo.lc_list* table to get the current values.
 
   svo.lc_damage (who, where)
-  	Returns the damage on one limb, named with or without the space, such as "left leg" or "leftleg". It's 0 for anyone not being tracked.
+  	Returns the damage on one limb, named with or without the space, such as "left leg" or "leftleg". It's 0 for anyone not being tracked, and 100 for a limb at level 1, so a broken limb always reads as broken.
+
+  svo.lc_level (who, where)
+  	Returns the limb's break level, from 0 to 3, named the same way.
 
   svo.lc_prepped (who, where)
   	Returns true if one more hit the size of your last one would break the limb.
 
   svo.lc_list (table)
-  	A table containing all of the limbcounters tracking data - organized by named tables of people and their limb damage. ::
+  	A table containing all of the limbcounters tracking data - organized by named tables of people and their limb damage, as dealt. ::
 
 	  	display(svo.lc_list)
 

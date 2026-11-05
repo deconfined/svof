@@ -11,7 +11,7 @@ local function makestats()
   local cities = {}
   for i = 1, #alldata do
     local p = alldata[i]
-    if not p.city or p.city == '' then p.city = "none" end
+    if not ndb.authority_ready or not p.city or p.city == '' then p.city = "unknown" end
     cities[p.city] = cities[p.city] or {}
     cities[p.city][#cities[p.city]+1] = p.name
   end

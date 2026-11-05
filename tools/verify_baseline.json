@@ -13,6 +13,26 @@
       "text": "Alias    svo (aliases, triggers) svo/(vcustomdef) Define your own defences [only in the package]"
     },
     {
+      "id": "added|Alias|svo (namedb)|NameDB/(ndb cancel) Cancel HTTP lookups",
+      "digest": "4224d6ddc71f119a",
+      "text": "Alias    svo (namedb) NameDB/(ndb cancel) Cancel HTTP lookups [only in the package]"
+    },
+    {
+      "id": "added|Alias|svo (namedb)|NameDB/HTTP character lookup",
+      "digest": "36355b4ef327651b",
+      "text": "Alias    svo (namedb) NameDB/HTTP character lookup [only in the package]"
+    },
+    {
+      "id": "added|Alias|svo (namedb)|NameDB/HTTP online list",
+      "digest": "814ddae31bc45fcc",
+      "text": "Alias    svo (namedb) NameDB/HTTP online list [only in the package]"
+    },
+    {
+      "id": "added|Alias|svo (namedb)|NameDB/HTTP unknown refresh",
+      "digest": "a80d9803d1a1febb",
+      "text": "Alias    svo (namedb) NameDB/HTTP unknown refresh [only in the package]"
+    },
+    {
       "id": "added|Script|svo (alias and defence functions)|Custom afflictions",
       "digest": "623f90d28ff27b8f",
       "text": "Script   svo (alias and defence functions) Custom afflictions [only in the package]"
@@ -43,6 +63,16 @@
       "text": "Script   svo (install me in module manager) Load & init/svo.remove_legacy_modules [only in the package]"
     },
     {
+      "id": "added|Script|svo (namedb)|NameDB/ndb.support/ndb.autodiscover",
+      "digest": "7c7ed234c32f4b2f",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.autodiscover [only in the package]"
+    },
+    {
+      "id": "added|Script|svo (namedb)|NameDB/ndb.support/ndb.http_lifecycle",
+      "digest": "b13a422b01b19c5c",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.http_lifecycle [only in the package]"
+    },
+    {
       "id": "added|Trigger|svo (aliases, triggers)|svo/Apostasy/Daegger withdrew",
       "digest": "15a7f8478518344e",
       "text": "Trigger  svo (aliases, triggers) svo/Apostasy/Daegger withdrew [only in the package]"
@@ -51,6 +81,21 @@
       "id": "added|Trigger|svo (aliases, triggers)|svo/Dragoncraft/Enmeshment freed",
       "digest": "075c83fe6d55356e",
       "text": "Trigger  svo (aliases, triggers) svo/Dragoncraft/Enmeshment freed [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Duress/Resounding clap",
+      "digest": "45a6143b8f2e76f4",
+      "text": "Trigger  svo (aliases, triggers) svo/Duress/Resounding clap [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Duress/Rising winds",
+      "digest": "c6b1b8936acf2b1d",
+      "text": "Trigger  svo (aliases, triggers) svo/Duress/Rising winds [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Duress/Upward launch",
+      "digest": "38faf0da1ef7d932",
+      "text": "Trigger  svo (aliases, triggers) svo/Duress/Upward launch [only in the package]"
     },
     {
       "id": "added|Trigger|svo (aliases, triggers)|svo/General/Ate/svo cured fulminated",
@@ -128,6 +173,26 @@
       "text": "Trigger  svo (aliases, triggers) svo/General/General cures/svo got myrrh generic [only in the package]"
     },
     {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/General/Server-side commands/Observed curing set",
+      "digest": "316a03b3d1eb6f93",
+      "text": "Trigger  svo (aliases, triggers) svo/General/Server-side commands/Observed curing set [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/General/Server-side commands/Priority aff clear",
+      "digest": "909d510f8b7cf998",
+      "text": "Trigger  svo (aliases, triggers) svo/General/Server-side commands/Priority aff clear [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/General/Server-side commands/Priority aff none",
+      "digest": "b72a56cbeb56754e",
+      "text": "Trigger  svo (aliases, triggers) svo/General/Server-side commands/Priority aff none [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/General/Server-side commands/Priority aff set",
+      "digest": "562d7beb14c255c5",
+      "text": "Trigger  svo (aliases, triggers) svo/General/Server-side commands/Priority aff set [only in the package]"
+    },
+    {
       "id": "added|Trigger|svo (aliases, triggers)|svo/General/Sip/svo sipped latched",
       "digest": "bfe8d80c98855831",
       "text": "Trigger  svo (aliases, triggers) svo/General/Sip/svo sipped latched [only in the package]"
@@ -173,6 +238,41 @@
       "text": "Trigger  svo (aliases, triggers) svo/General/svo vitrification woreoff [only in the package]"
     },
     {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Ignition/Incandescence activation",
+      "digest": "b4b19d787ac618c5",
+      "text": "Trigger  svo (aliases, triggers) svo/Ignition/Incandescence activation [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Ignition/Incandescence room",
+      "digest": "f0191946433945a0",
+      "text": "Trigger  svo (aliases, triggers) svo/Ignition/Incandescence room [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Ignition/Incandescence start",
+      "digest": "81f6424d7c5a9a73",
+      "text": "Trigger  svo (aliases, triggers) svo/Ignition/Incandescence start [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Miscellaneous/Criers bell direct",
+      "digest": "354197de37e35630",
+      "text": "Trigger  svo (aliases, triggers) svo/Miscellaneous/Criers bell direct [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Miscellaneous/Criers bell start",
+      "digest": "48d4d5e87fd41c2e",
+      "text": "Trigger  svo (aliases, triggers) svo/Miscellaneous/Criers bell start [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Miscellaneous/Endbringer continuation",
+      "digest": "a9885789b7c6af15",
+      "text": "Trigger  svo (aliases, triggers) svo/Miscellaneous/Endbringer continuation [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/Miscellaneous/Endbringer start",
+      "digest": "687d776cf5399279",
+      "text": "Trigger  svo (aliases, triggers) svo/Miscellaneous/Endbringer start [only in the package]"
+    },
+    {
       "id": "added|Trigger|svo (aliases, triggers)|svo/Poisons + Generic lines/Revealed by star sigil",
       "digest": "e41e6bff961a805b",
       "text": "Trigger  svo (aliases, triggers) svo/Poisons + Generic lines/Revealed by star sigil [only in the package]"
@@ -201,6 +301,11 @@
       "id": "added|Trigger|svo (aliases, triggers)|svo/Voicecraft/Crescendo peaks",
       "digest": "f385578ae71ec397",
       "text": "Trigger  svo (aliases, triggers) svo/Voicecraft/Crescendo peaks [only in the package]"
+    },
+    {
+      "id": "added|Trigger|svo (aliases, triggers)|svo/svo Bashing triggers/NPC stun",
+      "digest": "502816c2bfb8b90e",
+      "text": "Trigger  svo (aliases, triggers) svo/svo Bashing triggers/NPC stun [only in the package]"
     },
     {
       "id": "added|Trigger|svo (limbcounter)|svo (limbcounter)/svo devastate level 1",
@@ -233,6 +338,11 @@
       "text": "Alias    svo (limbcounter) / 'svo (limbcounter)': 5 items originally, 3 in merged"
     },
     {
+      "id": "count|Alias|svo (namedb)|NameDB",
+      "digest": "e9014b048ac0432c",
+      "text": "Alias    svo (namedb) / 'NameDB': 27 items originally, 24 in merged"
+    },
+    {
       "id": "count|Script|svo (install me in module manager)|Check for system updates",
       "digest": "c0dcf72fc2cc0600",
       "text": "Script   svo (install me in module manager) / 'Check for system updates': 5 items originally, 8 in merged"
@@ -248,14 +358,24 @@
       "text": "Script   svo (limbcounter) / 'svo (limbcounter)': 3 items originally, 2 in merged"
     },
     {
+      "id": "count|Script|svo (namedb)|NameDB",
+      "digest": "0b7fb4e410f0fc2e",
+      "text": "Script   svo (namedb) / 'NameDB': 27 items originally, 23 in merged"
+    },
+    {
       "id": "count|Trigger|svo (aliases, triggers)|svo",
-      "digest": "1baeb8a41ed68579",
-      "text": "Trigger  svo (aliases, triggers) / 'svo': 2533 items originally, 2549 in merged"
+      "digest": "1df18517563089fb",
+      "text": "Trigger  svo (aliases, triggers) / 'svo': 2533 items originally, 2563 in merged"
     },
     {
       "id": "count|Trigger|svo (limbcounter)|svo (limbcounter)",
       "digest": "d7923f5fab5b5d94",
       "text": "Trigger  svo (limbcounter) / 'svo (limbcounter)': 88 items originally, 6 in merged"
+    },
+    {
+      "id": "count|Trigger|svo (namedb)|Data Capture",
+      "digest": "9593625694237707",
+      "text": "Trigger  svo (namedb) / 'Data Capture': 65 items originally, 42 in merged"
     },
     {
       "id": "gone|Alias|svo (limbcounter)|svo (limbcounter)/Set the hits needed",
@@ -266,6 +386,41 @@
       "id": "gone|Alias|svo (limbcounter)|svo (limbcounter)/Syncronize hits",
       "digest": "5f37cf15889fce47",
       "text": "Alias    svo (limbcounter) svo (limbcounter)/Syncronize hits [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/(ndb cancel) Cancel honors'ing people",
+      "digest": "0929a6e33adef456",
+      "text": "Alias    svo (namedb) NameDB/(ndb cancel) Cancel honors'ing people [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/(ndb honorsnew) Honors backlog of new people",
+      "digest": "b4f5f683e96132cc",
+      "text": "Alias    svo (namedb) NameDB/(ndb honorsnew) Honors backlog of new people [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/(ndb infamous) Shows known infamous people in the database",
+      "digest": "48673e3f1d273728",
+      "text": "Alias    svo (namedb) NameDB/(ndb infamous) Shows known infamous people in the database [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/(qwi) Show Infamous (update first)",
+      "digest": "4747f79caccfb283",
+      "text": "Alias    svo (namedb) NameDB/(qwi) Show Infamous (update first) [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/(qwic) Show Infamous (quick)",
+      "digest": "1fb41945b3e8991f",
+      "text": "Alias    svo (namedb) NameDB/(qwic) Show Infamous (quick) [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/(qwm) Show marks",
+      "digest": "9a89fb4de9f8bf3c",
+      "text": "Alias    svo (namedb) NameDB/(qwm) Show marks [only in the originals]"
+    },
+    {
+      "id": "gone|Alias|svo (namedb)|NameDB/Honors a person",
+      "digest": "ff612cf60564304d",
+      "text": "Alias    svo (namedb) NameDB/Honors a person [only in the originals]"
     },
     {
       "id": "gone|Script|svo (install me in module manager)|Check for system updates/svo_downloaded_file",
@@ -293,6 +448,36 @@
       "text": "Script   svo (limbcounter) svo (limbcounter)/svo count show [only in the originals]"
     },
     {
+      "id": "gone|Script|svo (namedb)|NameDB/ndb.support/ndb.datamining",
+      "digest": "7b85eef43f87ebea",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.datamining [only in the originals]"
+    },
+    {
+      "id": "gone|Script|svo (namedb)|NameDB/ndb.support/ndb.datamining/ndb.setfromclass",
+      "digest": "ae9cb6438d383d02",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.datamining/ndb.setfromclass [only in the originals]"
+    },
+    {
+      "id": "gone|Script|svo (namedb)|NameDB/ndb.support/ndb.finished_honors",
+      "digest": "13e1791cd96907f8",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.finished_honors [only in the originals]"
+    },
+    {
+      "id": "gone|Script|svo (namedb)|NameDB/ndb.support/ndb.showqwi",
+      "digest": "46663a192ee07d23",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.showqwi [only in the originals]"
+    },
+    {
+      "id": "gone|Script|svo (namedb)|NameDB/ndb.support/ndb.ui",
+      "digest": "1a667c823c15101a",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.ui [only in the originals]"
+    },
+    {
+      "id": "gone|Script|svo (namedb)|NameDB/ndb.support/ndb.updatebyhonors",
+      "digest": "99f7c7761bf4f907",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.updatebyhonors [only in the originals]"
+    },
+    {
       "id": "gone|Trigger|svo (aliases, triggers)|svo/General/Applied salve/svo cure scalded",
       "digest": "b618797a78de67fc",
       "text": "Trigger  svo (aliases, triggers) svo/General/Applied salve/svo cure scalded [only in the originals]"
@@ -306,6 +491,11 @@
       "id": "gone|Trigger|svo (aliases, triggers)|svo/General/Focus/svo cured weakness",
       "digest": "1ed3c3749c9af5ba",
       "text": "Trigger  svo (aliases, triggers) svo/General/Focus/svo cured weakness [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (aliases, triggers)|svo/General/Server-side commands/slowcuring set switch",
+      "digest": "7f2ef87a676ee312",
+      "text": "Trigger  svo (aliases, triggers) svo/General/Server-side commands/slowcuring set switch [only in the originals]"
     },
     {
       "id": "gone|Trigger|svo (aliases, triggers)|svo/General/Smoke/svo cured madness",
@@ -803,6 +993,121 @@
       "text": "Trigger  svo (limbcounter) svo (limbcounter)/svolc Don't register 2 [only in the originals]"
     },
     {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person",
+      "digest": "5ea9ea218abe83ad",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors",
+      "digest": "b2fbb5fa8e2921ab",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Age",
+      "digest": "02dd18da4647e8f4",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Age [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Age hidden",
+      "digest": "b339129f5581a203",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Age hidden [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Any line",
+      "digest": "f1e043275daa03c1",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Any line [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Arms",
+      "digest": "b7c3fa5e80aa99d0",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Arms [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/City & rank",
+      "digest": "49e082a8a10d7ff3",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/City & rank [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/City soldier",
+      "digest": "f62cbe9ac7cdfb9a",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/City soldier [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Combat rank",
+      "digest": "3d375dd515ebda9a",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Combat rank [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Divorced",
+      "digest": "d2280bb91596d7eb",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Divorced [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Equal might",
+      "digest": "e4de126bfc63a910",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Equal might [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Housemate",
+      "digest": "9d1129b812ad335f",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Housemate [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Infamous",
+      "digest": "c0a299e6d8d46eed",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Infamous [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Might",
+      "digest": "829979caddb6aa6a",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Might [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Motto-Warcry",
+      "digest": "80a5f56b1cdc9cee",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Motto-Warcry [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Not Infamous",
+      "digest": "66a4e87ad605672b",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Not Infamous [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Stop getting (honors)",
+      "digest": "98b9cd4df4b34751",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Stop getting (honors) [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/Unranked",
+      "digest": "d5bbd4782c790e64",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/Unranked [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/XP rank",
+      "digest": "54aaecf21324aab2",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/XP rank [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/ivory mark",
+      "digest": "0b22aac985112a7c",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/ivory mark [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Honors/quisalis mark",
+      "digest": "17fed89ce74ded03",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Honors/quisalis mark [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/Immortal",
+      "digest": "5bd0f44f8284b508",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/Immortal [only in the originals]"
+    },
+    {
+      "id": "gone|Trigger|svo (namedb)|Data Capture/Honors on a person/No Honours",
+      "digest": "9ea5fb59a6565781",
+      "text": "Trigger  svo (namedb) Data Capture/Honors on a person/No Honours [only in the originals]"
+    },
+    {
       "id": "item|Alias|svo (aliases, triggers)|svo/(vversion) Show system version|script",
       "digest": "7b8e8fa2b7a3b73d",
       "text": "Alias    svo (aliases, triggers) svo/(vversion) Show system version [script]"
@@ -818,6 +1123,41 @@
       "text": "Alias    svo (aliases, triggers) svo/Show hidelist [script]"
     },
     {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb delete all) Wipe the database clean|script",
+      "digest": "c8c58b327d40b1e9",
+      "text": "Alias    svo (namedb) NameDB/(ndb delete all) Wipe the database clean [script]"
+    },
+    {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb delete person) Delete one individual entry|script",
+      "digest": "815ef9d1926a28a3",
+      "text": "Alias    svo (namedb) NameDB/(ndb delete person) Delete one individual entry [script]"
+    },
+    {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb delete unranked) Wipe all unranked (newbies and dormant) players|script",
+      "digest": "370cbe809abc978e",
+      "text": "Alias    svo (namedb) NameDB/(ndb delete unranked) Wipe all unranked (newbies and dormant) players [script]"
+    },
+    {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb set person category value) Adjust person data|script",
+      "digest": "20a58545f81c305b",
+      "text": "Alias    svo (namedb) NameDB/(ndb set person category value) Adjust person data [script]"
+    },
+    {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb stats) See DB stats|script",
+      "digest": "b7052fe0f5647d58",
+      "text": "Alias    svo (namedb) NameDB/(ndb stats) See DB stats [script]"
+    },
+    {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb update all) Re-check every person in the database|script",
+      "digest": "55c070dcda94a9e3",
+      "text": "Alias    svo (namedb) NameDB/(ndb update all) Re-check every person in the database [script]"
+    },
+    {
+      "id": "item|Alias|svo (namedb)|NameDB/(ndb update unranked) Re-check all unranked players|script",
+      "digest": "e6d99f1d19f671d8",
+      "text": "Alias    svo (namedb) NameDB/(ndb update unranked) Re-check all unranked players [script]"
+    },
+    {
       "id": "item|Alias|svo (namedb)|NameDB/Enemies lists|script",
       "digest": "47331a71696caa53",
       "text": "Alias    svo (namedb) NameDB/Enemies lists [script]"
@@ -829,7 +1169,7 @@
     },
     {
       "id": "item|Script|svo (actions dictionary)|Dictionary of actions (affs-defs-misc)|script",
-      "digest": "3d1afe7456054bb0",
+      "digest": "1d6709b831d669dd",
       "text": "Script   svo (actions dictionary) Dictionary of actions (affs-defs-misc) [script]"
     },
     {
@@ -859,22 +1199,22 @@
     },
     {
       "id": "item|Script|svo (curing skeleton, controllers, action system)|Controllers|script",
-      "digest": "b1aacedafbbb83b2",
+      "digest": "6eba284a19a0cfc3",
       "text": "Script   svo (curing skeleton, controllers, action system) Controllers [script]"
     },
     {
       "id": "item|Script|svo (curing skeleton, controllers, action system)|Curing skeleton|script",
-      "digest": "49bd3adc54cefcdc",
+      "digest": "f77d64d60be85d49",
       "text": "Script   svo (curing skeleton, controllers, action system) Curing skeleton [script]"
     },
     {
       "id": "item|Script|svo (custom prompt, serverside)|Custom prompt|script",
-      "digest": "168eba2e62c02b9a",
+      "digest": "bff955f68339d786",
       "text": "Script   svo (custom prompt, serverside) Custom prompt [script]"
     },
     {
       "id": "item|Script|svo (custom prompt, serverside)|Serverside|script",
-      "digest": "eec1570db15acbbf",
+      "digest": "335ab2288aff7bfa",
       "text": "Script   svo (custom prompt, serverside) Serverside [script]"
     },
     {
@@ -928,6 +1268,11 @@
       "text": "Script   svo (install me in module manager) Create Svof namespace [script]"
     },
     {
+      "id": "item|Script|svo (install me in module manager)|Event handlers/svo_events|events",
+      "digest": "c5d51666759919d5",
+      "text": "Script   svo (install me in module manager) Event handlers/svo_events [events]"
+    },
+    {
       "id": "item|Script|svo (install me in module manager)|Load & init/svo.uninstall_all_modules|events",
       "digest": "11a3fdf6c54d3446",
       "text": "Script   svo (install me in module manager) Load & init/svo.uninstall_all_modules [events]"
@@ -969,13 +1314,18 @@
     },
     {
       "id": "item|Script|svo (install, config, pipes, rift, parry, prios)|Config system|script",
-      "digest": "de743316e588e980",
+      "digest": "10a177af11566e57",
       "text": "Script   svo (install, config, pipes, rift, parry, prios) Config system [script]"
     },
     {
       "id": "item|Script|svo (install, config, pipes, rift, parry, prios)|Install system|script",
-      "digest": "209a385a5e8a58af",
+      "digest": "2594c682ea04614e",
       "text": "Script   svo (install, config, pipes, rift, parry, prios) Install system [script]"
+    },
+    {
+      "id": "item|Script|svo (install, config, pipes, rift, parry, prios)|Parry|script",
+      "digest": "6f8a7c1f810bb541",
+      "text": "Script   svo (install, config, pipes, rift, parry, prios) Parry [script]"
     },
     {
       "id": "item|Script|svo (install, config, pipes, rift, parry, prios)|Pipes|script",
@@ -994,7 +1344,7 @@
     },
     {
       "id": "item|Script|svo (limbcounter)|svo (limbcounter)/svo limbcounter|script",
-      "digest": "dd9d8c587c70d666",
+      "digest": "2a578389e8d9ea22",
       "text": "Script   svo (limbcounter) svo (limbcounter)/svo limbcounter [script]"
     },
     {
@@ -1013,13 +1363,63 @@
       "text": "Script   svo (mindnet) svo Mindnet Report [script]"
     },
     {
+      "id": "item|Script|svo (namedb)|NameDB/Data Input/Names from Semla Feb 10th 2010|script",
+      "digest": "1ee9c90c52805609",
+      "text": "Script   svo (namedb) NameDB/Data Input/Names from Semla Feb 10th 2010 [script]"
+    },
+    {
       "id": "item|Script|svo (namedb)|NameDB/ndb main code|script",
-      "digest": "d5e14e7d7bd7e477",
+      "digest": "79da4f87ae70ae11",
       "text": "Script   svo (namedb) NameDB/ndb main code [script]"
     },
     {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.aliases|script",
+      "digest": "f793a7f87ffa3b59",
+      "text": "Script   svo (namedb) NameDB/ndb.aliases [script]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.highlighter/ndb.addhighlightname|events",
+      "digest": "7021fea21fce50e4",
+      "text": "Script   svo (namedb) NameDB/ndb.highlighter/ndb.addhighlightname [events]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.highlighter/ndb.addhighlightname|script",
+      "digest": "9a854cf1a92684ed",
+      "text": "Script   svo (namedb) NameDB/ndb.highlighter/ndb.addhighlightname [script]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.init|script",
+      "digest": "c82e1f8d275dc272",
+      "text": "Script   svo (namedb) NameDB/ndb.init [script]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.support/ndb.close|script",
+      "digest": "31bd2c5ce07add08",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.close [script]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.support/ndb.configs|script",
+      "digest": "98ce6cff9398e6cc",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.configs [script]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.support/ndb.downloaded_file|events",
+      "digest": "7ef3abe0b719277c",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.downloaded_file [events]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.support/ndb.downloaded_file|script",
+      "digest": "61950f431562f5b8",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.downloaded_file [script]"
+    },
+    {
+      "id": "item|Script|svo (namedb)|NameDB/ndb.support/ndb.fixes|script",
+      "digest": "1cc142cd76a4ebbc",
+      "text": "Script   svo (namedb) NameDB/ndb.support/ndb.fixes [script]"
+    },
+    {
       "id": "item|Script|svo (namedb)|NameDB|script",
-      "digest": "7644f8341b086220",
+      "digest": "f479aeb037ab5e19",
       "text": "Script   svo (namedb) NameDB [script]"
     },
     {
@@ -1053,6 +1453,11 @@
       "text": "Script   svo (runeidentifier) svo (runeidentifier) [script]"
     },
     {
+      "id": "item|Script|svo (setup, misc, empty, funnies, dor)|Dor|script",
+      "digest": "36659fba07d14d67",
+      "text": "Script   svo (setup, misc, empty, funnies, dor) Dor [script]"
+    },
+    {
       "id": "item|Script|svo (setup, misc, empty, funnies, dor)|Empty cure handling|script",
       "digest": "8d3b38ceb54de3a6",
       "text": "Script   svo (setup, misc, empty, funnies, dor) Empty cure handling [script]"
@@ -1069,7 +1474,7 @@
     },
     {
       "id": "item|Script|svo (setup, misc, empty, funnies, dor)|Setup|script",
-      "digest": "82e64a45dfb4b39f",
+      "digest": "1f2d58802201ba3f",
       "text": "Script   svo (setup, misc, empty, funnies, dor) Setup [script]"
     },
     {
@@ -1521,6 +1926,11 @@
       "id": "item|Trigger|svo (aliases, triggers)|svo/General/Registration/Started|colorTriggerFgColor",
       "digest": "61baa56f5354675b",
       "text": "Trigger  svo (aliases, triggers) svo/General/Registration/Started [colorTriggerFgColor]"
+    },
+    {
+      "id": "item|Trigger|svo (aliases, triggers)|svo/General/Server-side commands/vconfig gagserverside|patterns",
+      "digest": "2898eb189d8e95ec",
+      "text": "Trigger  svo (aliases, triggers) svo/General/Server-side commands/vconfig gagserverside [patterns]"
     },
     {
       "id": "item|Trigger|svo (aliases, triggers)|svo/General/Symptoms/Anorexia|script",
@@ -2953,9 +3363,29 @@
       "text": "Trigger  svo (limbcounter) svo (limbcounter)/svo target cured limbs [script]"
     },
     {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Birthdays list|script",
+      "digest": "eaf93bffbe878f0d",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Birthdays list [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Citizens/Stop getting (citizens)|script",
+      "digest": "84cadd52c2a65553",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Citizens/Stop getting (citizens) [script]"
+    },
+    {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/City-House-Order enemies|colorTriggerFgColor",
       "digest": "ae8471e78ca5a992",
       "text": "Trigger  svo (namedb) Data Capture/Lists/City-House-Order enemies [colorTriggerFgColor]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/City-House-Order enemies|script",
+      "digest": "fcdc088c97f047d3",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/City-House-Order enemies [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Clan Position Start/Clan Position Name/Close Clan Positions|script",
+      "digest": "9e96e451c90ff65f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Clan Position Start/Clan Position Name/Close Clan Positions [script]"
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Clan Position Start/Clan Position Name/People In Position|colorTriggerFgColor",
@@ -2974,8 +3404,43 @@
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Clan who/Get name (clan who)|script",
-      "digest": "54c8d1aa689ea560",
+      "digest": "aef7dbacf58d5918",
       "text": "Trigger  svo (namedb) Data Capture/Lists/Clan who/Get name (clan who) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Clan who/Stop (clan who)|script",
+      "digest": "c2d44b5e120ec7a7",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Clan who/Stop (clan who) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Clan who|script",
+      "digest": "088ae673b526d60f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Clan who [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Friend Checking/Get name (Friend)|script",
+      "digest": "02dada1b9f5412ed",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Friend Checking/Get name (Friend) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Friend Checking/Stop (friend who)|script",
+      "digest": "a04f7251ba17b41c",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Friend Checking/Stop (friend who) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Friend Checking|script",
+      "digest": "088ae673b526d60f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Friend Checking [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/House members/Get name (house members)|script",
+      "digest": "7b6d25c0ac08a85e",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/House members/Get name (house members) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/House members/Stop getting (house members)|script",
+      "digest": "b50e2f8c31ad7fa1",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/House members/Stop getting (house members) [script]"
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB cwho/Get name (cwho)|patterns",
@@ -2984,8 +3449,33 @@
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB cwho/Get name (cwho)|script",
-      "digest": "16581ce0687bbc53",
+      "digest": "e92ba6688bbb9d87",
       "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB cwho/Get name (cwho) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB cwho/Stop getting (cwho)|script",
+      "digest": "e70caca2cc2cba9f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB cwho/Stop getting (cwho) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB cwho|script",
+      "digest": "088ae673b526d60f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB cwho [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB hwho/Get name (hwho)|script",
+      "digest": "9e4d42e033745713",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB hwho/Get name (hwho) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB hwho/Stop getting (hwho)|script",
+      "digest": "26883e35b2e4836c",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB hwho/Stop getting (hwho) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB qw 2|script",
+      "digest": "5ce2d5fe2a2379fd",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB qw 2 [script]"
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB qw|patterns",
@@ -2994,8 +3484,18 @@
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/NameDB qw|script",
-      "digest": "dd2d8666079ef2d9",
+      "digest": "d8c958affc78cc8f",
       "text": "Trigger  svo (namedb) Data Capture/Lists/NameDB qw [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Order members/Skip (order members)/Member|script",
+      "digest": "c27078cb71cc9a6f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Order members/Skip (order members)/Member [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Order members/Skip (order members)/Stop (order members)|script",
+      "digest": "2a4d99832eb67fc2",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Order members/Skip (order members)/Stop (order members) [script]"
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Party who/Get name (party who)|patterns",
@@ -3004,8 +3504,38 @@
     },
     {
       "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Party who/Get name (party who)|script",
-      "digest": "fe148a4f3ce7c4d4",
+      "digest": "407e5dff0330f977",
       "text": "Trigger  svo (namedb) Data Capture/Lists/Party who/Get name (party who) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Party who/Stop (party who)|script",
+      "digest": "f9bd5c199cd47d8f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Party who/Stop (party who) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Lists/Party who|script",
+      "digest": "088ae673b526d60f",
+      "text": "Trigger  svo (namedb) Data Capture/Lists/Party who [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Various common things/Channel history/End (channel history)|script",
+      "digest": "c9396a414069f2da",
+      "text": "Trigger  svo (namedb) Data Capture/Various common things/Channel history/End (channel history) [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Various common things/Citizened a person|script",
+      "digest": "12b307495fa473a5",
+      "text": "Trigger  svo (namedb) Data Capture/Various common things/Citizened a person [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Various common things/Newbie spawned - house newcomers|script",
+      "digest": "95be8f4484f04e89",
+      "text": "Trigger  svo (namedb) Data Capture/Various common things/Newbie spawned - house newcomers [script]"
+    },
+    {
+      "id": "item|Trigger|svo (namedb)|Data Capture/Various common things/Newbie spawned - reborn|script",
+      "digest": "edf4562fb057ca70",
+      "text": "Trigger  svo (namedb) Data Capture/Various common things/Newbie spawned - reborn [script]"
     },
     {
       "id": "item|Trigger|svo (offering)|Shrine full-gone|script",

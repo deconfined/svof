@@ -19,9 +19,6 @@ end
 
 ndb.fixed_set(ndb.db.people[field.."enemy"], 1, db:in_(ndb.db.people.name, names))
 
--- reload all highlights
-ndb.loadhighlights()
-
 echo'\n'
 
 if ndb.checkingenemies and ndb.checkingenemies.option then
@@ -29,10 +26,11 @@ if ndb.checkingenemies and ndb.checkingenemies.option then
   for i = 1, #names do
     temp_name_list[#temp_name_list + 1] = {
       name = names[i],
+      [field .. "enemy"] = 1,
     }
   end
 
-  db:merge_unique(ndb.db.people, temp_name_list)
+  ndb.merge_discovery(temp_name_list)
 
   svo.echof(field:title().." enemies list updated, and new names added.")
 
@@ -40,6 +38,8 @@ if ndb.checkingenemies and ndb.checkingenemies.option then
 else
   svo.echof(field:title().." enemies list updated.")
 end
+-- Include newly discovered enemy names as well as existing rows.
+ndb.loadhighlights()
 
 disableTrigger("City-House-Order enemies")
 if ndb.checkingenemies then killTimer(ndb.checkingenemies[1]) end

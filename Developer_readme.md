@@ -38,6 +38,7 @@ change, and both are structural - `--write-baseline` refuses to bless either.
 Anything nested is an ordinary content difference and can be baselined in the
 same commit that causes it.
 
+
     doc/                                                  = documentation in Sphinx.
     src/                                                  = the source: one file per item, grouped as below
     tools/                                                = conversion, verification and CI gates
@@ -135,6 +136,149 @@ This the order that things happen on the prompt function:
      |   |custom prompt
      |   |cnrl.dolockwarning
 
+
+### NPC stun onset coverage
+
+`NPC stun` matches the off-duty prison guard's spear-haft sentence and the two
+exact scimitar-wielding Vertani soldier headbutt/weapon-butt sentences, also
+recorded in LEVI's `722_Stunned.lua`. It does not generalize to arbitrary NPC
+or weapon names. All three call `svo.valid.proper_stun()` without a duration:
+their game durations have not been established, so native default timing
+and the anti-illusion probe apply. The similar Ulsyndar sentence's existing
+half-second setting is not treated as evidence for the prison guard.
+
+All three onsets enter native lifevision validation and the existing stun
+waiting action. Native recovery, refusal confirmation and timeout cleanup
+remain the only lifecycle; there is no separate hunting stun flag or timer.
+The generic refusal, recovery and concussion-bomb triggers are unchanged.
+
+`svo.deepcopy` copies raw table storage with `next`, retaining OrderedMap's
+internal key list in pending-stun snapshots. On Lua 5.2+ `pairs` instead used
+its logical `__pairs` iterator, losing that list and crashing probe recovery.
+Raw iteration preserves the original Lua 5.1 behavior.
+
+Run `lua tools/test_npc_stun.lua` from this checkout for real-loader
+regressions with Mudlet stubbed: balanced/off-balance onset, accepted/rejected
+claims, probe confirmation, early recovery, native expiry and single
+processing. This does not establish live-game durations or Mudlet matching.
+After changing trigger metadata, regenerate the shipped custom-affliction
+collision catalog with `python3 tools/trigger_catalog.py --write`. The merged
+object-diff baseline acknowledges the added `NPC stun` trigger, its parent
+item-count change, and the raw-storage copy fix in `Setup`. Do not change
+the pinned reference XMLs to make the gate pass.
+
+### Native correctness fixes from the Wundersys review
+
+These are native svof changes, not a Wundersys dependency or a second curing
+loop. FITNESS remains owned by native svof.
+
+- Stored priority writes use one owned FIFO. Every batch explicitly selects
+  `normal` or `slowcuring`, then restores the current native curing mode.
+  A snapshot packs independent set/kind streams without letting newer writes
+  overtake detached older ones. Overflow and reset boundaries retain
+  ordering; the existing throttle limits are unchanged.
+- Cancelling unsent writes invalidates their synchronization caches. Loader
+  reload and login resume a fresh native snapshot rather than treating
+  discarded writes as delivered. Guarded Mudlet connection/disconnection
+  handlers own online state; configuration setup does not establish a
+  connection. Disabled, disconnected and still-logging-in sessions do not
+  drain stored priority writes. Global health/mana regeneration preferences
+  keep their existing native buffered path.
+- Initial/manual resets select both owned sets before resetting their
+  affliction and defence lists. Classchange's reset completes before its
+  immediate loader reload can cancel pending work.
+- No-argument `svo.undo` actually removes the first native do-queue entry.
+  Named/all cancellation, the free queue and remaining entries retain their
+  separate meanings.
+- Parry setup keeps the public `svo.sp_config` table and native executor in
+  sync. The `full` strategy reads native limb stages, including head/torso
+  injuries; the obsolete action-level gate and setter are removed. This is
+  not percentage-adaptive parry.
+- Custom-prompt literal buffers are Lua-quoted safely. Apostrophes,
+  backslashes and actual newlines survive; textual `\n`/`\t` are no longer
+  accidentally interpreted. Tags, colours and custom expression definitions
+  retain their grammar.
+- Issued Skills.Info/List requests resolve canonical configuration names
+  through one mapping. Unrequested/stale responses cannot rewrite unrelated
+  flags. Ordinary re-detection preserves explicit preferences; a confirmed
+  fresh install resets them, including the actual `conf.morphskill` field.
+  Tekura Guarding is not Parry.
+
+**First-upgrade requirement:** restart Mudlet cleanly before using this
+version. The previous priority implementation created untracked delayed
+callbacks; replacing scripts in a running session cannot safely reclaim
+those callbacks. No global timer kill, user do-queue clear or server queue
+clear is used as a substitute. Subsequent reloads of this implementation have
+owned cancellation/resynchronization.
+
+Run from this checkout:
+
+```sh
+lua tools/test_priority_delivery.lua
+lua tools/test_do_undo.lua
+lua tools/test_parry_policy.lua
+lua tools/test_prompt_literals.lua
+lua tools/test_skill_discovery.lua
+lua tools/test_focus_guards.lua
+```
+
+These exercise real native loaders with Mudlet transport/UI stubbed, not a
+live game session. The focus suite now tests admission, sends, login policy
+delivery and recovery deadlines rather than source-text/helper wiring.
+
+The parent repository's `TODO.md` lists the user-approved evidence deferrals:
+Slough, Purify, Accelerate, automatic self-Fool, Weaponmastery
+Continuation/Discipline, manual Avoidance and curative-inventory
+reconciliation. No guessed automatic actions or disabled scaffolds were
+added. Section 3 remains a separate investigation: priority-reset preview,
+coupled presets, focus/threat policies, percentage-adaptive parry, extra
+resource prompt tags and mount-presence policy are not implemented here.
+
+
+### Passive server feedback and hazard observations
+
+`svo.me.priorityaff` is a stable, read-only observation record, separate from
+stored curing ranks. `status` is `unknown`, `active` or `none`; an active
+`affliction` is the raw game name, including unknown future names. `reason`,
+`cleared`, `mismatch`, `previous_affliction` and `curingset` retain the relevant
+evidence. `svo priority aff changed` emits `(status, affliction, reason)`.
+Named clear mismatches invalidate certainty; only the captureless absence
+line proves absence without a known matching active override. Observed set
+switches, reload and connection boundaries invalidate stale certainty.
+Outgoing commands, local cures and priority resets do not infer state.
+The broader set-acknowledgement trigger preserves normal/slowcuring gag
+conditions and replaces their old paths rather than matching twice.
+
+Ten reference-backed hazard records add neutral Endbringer,
+Incandescence, Crier's Bell and Airlord observations. The two existing Doom
+records are unchanged. Continuation lines use their own actor/listener;
+captureless launches and ambiguous room appearances do not invent actors.
+These new warnings have initial messages only: no threat timers, death
+thresholds, automated movement or cures.
+
+All warnings share the native lifevision claim. An accepted batch renders
+every initial message in order and schedules only its last prefixed entry;
+later initial-only observations do not suppress that prefix. Scalar
+epoch/action tickets survive native stun snapshots while rejecting replaced,
+expired or previous-session work. Rejected claims cannot donate warnings to
+a later prompt. Existing cross-prompt timed-prefix policy is otherwise
+unchanged.
+
+```sh
+lua tools/test_priority_feedback.lua
+lua tools/test_warning_replay.lua
+python3 tools/test_passive_observations.py --lua lua
+```
+
+The Python runner matches shipped metadata with real PCRE2/substring
+semantics, then passes those captures into shipped handlers and real native
+prompt processing. It also runs the hazard warning behavior suite.
+It needs Python 3, Lua 5.1+ and the PCRE2 8-bit shared library
+(`libpcre2-8-0` on Ubuntu; system/Homebrew PCRE2 on macOS).
+`lua tools/test_hazard_warnings.lua` runs the logic-only cases without PCRE2.
+Reference wording is not a substitute for current game captures or a live
+Mudlet acceptance check. Regenerate the trigger catalog and review the merged
+object diff before updating its baseline when changing this metadata.
 
 # How to's
 

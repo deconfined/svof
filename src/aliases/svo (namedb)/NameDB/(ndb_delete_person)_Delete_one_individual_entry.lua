@@ -7,6 +7,7 @@ local exists = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
 
 if not (exists and next(exists)) then svo.echof("%s doesn't exist in the database already.", name) svo.showprompt() return end
 
+ndb.cancel_lookups()
 db:delete(ndb.db.people, db:eq(ndb.db.people.name, name))
 
 raiseEvent("NameDB name deleted", name)

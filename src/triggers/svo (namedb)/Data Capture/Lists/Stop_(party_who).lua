@@ -1,6 +1,6 @@
 setTriggerStayOpen("Party who", 0)
 
-db:merge_unique(ndb.db.people, temp_name_list)
+ndb.merge_discovery(temp_name_list)
 
 for _, person in pairs(temp_name_list) do
   raiseEvent("NameDB saw list name", person.name)
@@ -15,10 +15,10 @@ if next(ndb.temp_classes_list) then
   end
 
   moveCursor(0, getLineNumber())
-  svo.itf("%s present, of those %s %s dragon%s.\n", svo.concatand(classes), temp_dragon, (temp_dragon == 1 and 'is a' or 'are'), (temp_dragon == 1 and '' or 's'))
+  svo.itf("Cached API classes: %s (%s names total).\n", svo.concatand(classes), #temp_name_list)
   moveCursorEnd()
   ndb.temp_classes_list = nil
 end
 
-temp_name_list, temp_dragon = nil, nil
+temp_name_list = nil
 raiseEvent("NameDB got new data")

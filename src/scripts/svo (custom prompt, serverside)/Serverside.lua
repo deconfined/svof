@@ -16,13 +16,96 @@ local sys, affs, defdefup, defkeepup, signals = svo.sys, svo.affs, svo.defdefup,
 local conf, sk, me, defs = svo.conf, svo.sk, svo.me, svo.defs
 local stats = svo.stats
 
+-- Passive game acknowledgements, separate from stored ranks and delivery caches.
+-- Keep this public table stable across reloads; no per-set override is inferred.
+local priorityaff = me.priorityaff
+local priorityaffreason = type(priorityaff) == "table" and "reload" or "startup"
+if type(priorityaff) ~= "table" then priorityaff = {}; me.priorityaff = priorityaff end
+
+local function recordpriorityaff(status, affliction, reason, cleared, mismatch, previous, curingset)
+  local changed = priorityaff.status ~= status or priorityaff.affliction ~= affliction
+    or priorityaff.reason ~= reason or priorityaff.cleared ~= cleared
+    or priorityaff.mismatch ~= mismatch or priorityaff.previous_affliction ~= previous
+    or priorityaff.curingset ~= curingset
+  priorityaff.status, priorityaff.affliction, priorityaff.reason = status, affliction, reason
+  priorityaff.cleared, priorityaff.mismatch = cleared, mismatch
+  priorityaff.previous_affliction, priorityaff.curingset = previous, curingset
+  if changed then raiseEvent("svo priority aff changed", status, affliction, reason) end
+end
+
+function sk.observeprioaff(kind, rawname)
+  if kind == "set" then
+    recordpriorityaff("active", rawname, "set", nil, nil, nil, priorityaff.curingset)
+  elseif kind == "none" then
+    -- Captureless feedback must never consume a previous trigger's matches.
+    recordpriorityaff("none", nil, "none", nil, nil, nil, priorityaff.curingset)
+  elseif kind == "clear" then
+    if priorityaff.status == "none"
+        or (priorityaff.status == "active" and priorityaff.affliction == rawname) then
+      recordpriorityaff("none", nil, "clear", rawname, nil, nil, priorityaff.curingset)
+    elseif priorityaff.status == "active" then
+      recordpriorityaff("unknown", nil, "clear-mismatch", rawname, true,
+        priorityaff.affliction, priorityaff.curingset)
+    elseif priorityaff.reason ~= "clear-mismatch" or priorityaff.cleared ~= rawname then
+      recordpriorityaff("unknown", nil, "clear-unknown", rawname, nil, nil, priorityaff.curingset)
+    end
+  end
+end
+
+function sk.observecuringset(rawname)
+  local previous = priorityaff.affliction
+  if priorityaff.reason == "curingset-switch" and priorityaff.curingset == rawname then
+    previous = priorityaff.previous_affliction
+  end
+  recordpriorityaff("unknown", nil, "curingset-switch", nil, nil, previous, rawname)
+end
+
+-- These handlers only invalidate observational certainty. The native priority
+-- writer owns its separate connection handlers and all delivery authority.
+if sk.priorityaffdisconnecthandler then killAnonymousEventHandler(sk.priorityaffdisconnecthandler) end
+if sk.priorityaffconnecthandler then killAnonymousEventHandler(sk.priorityaffconnecthandler) end
+local disconnecthandler, connecthandler
+disconnecthandler = registerAnonymousEventHandler("sysDisconnectionEvent", function()
+  if sk.priorityaffdisconnecthandler ~= disconnecthandler then return end
+  recordpriorityaff("unknown", nil, "disconnect")
+end)
+connecthandler = registerAnonymousEventHandler("sysConnectionEvent", function()
+  if sk.priorityaffconnecthandler ~= connecthandler then return end
+  recordpriorityaff("unknown", nil, "reconnect")
+end)
+sk.priorityaffdisconnecthandler, sk.priorityaffconnecthandler = disconnecthandler, connecthandler
+recordpriorityaff("unknown", nil, priorityaffreason)
+
+-- Own the snapshot timer just like the wire writer. Invalidated callbacks may
+-- still be delivered by Mudlet after a reload or disconnect.
+if sk.cancelpriorityupdates then sk.cancelpriorityupdates() end
+sk.cancelprioritydelivery()
+function sk.cancelpriorityupdates()
+  if type(sk.priochangetimer) == "number" then killTimer(sk.priochangetimer) end
+  sk.priochangetimer, sk.priorityupdateticket = nil, nil
+end
+
+function sk.schedulepriorityupdate()
+  if not conf.serverside or sk.prioritydisconnected or svo.logging_in
+      or not svo.systemloaded or sk.priochangetimer then return end
+  local ticket = {}
+  sk.priorityupdateticket = ticket
+  sk.priochangetimer = tempTimer(0, function()
+    if sk.priorityupdateticket ~= ticket then return end
+    sk.updateserversideprios()
+  end)
+end
+
+function sk.resumepriorityupdates()
+  if sk.priorityneedsync then sk.schedulepriorityupdate() end
+end
+signals.changecuring:connect(sk.resumepriorityupdates, 'resume invalidated native priority snapshot')
+
 -- update serverside prios in general
 signals["svo prio changed"]:connect(function()
   if not conf.serverside then return end
 
-  if not sk.priochangetimer then
-    sk.priochangetimer = tempTimer(0, function() sk.updateserversideprios() end)
-  end
+  sk.schedulepriorityupdate()
 end, 'update serverside prios on svo prio change')
 
 -- update serverside prios with custom svo.dict overrides, ie for health which is not on serverside prios
@@ -35,11 +118,16 @@ end, 'run onprioswitch dict functions')
 -- start out with blank prios, so a diff on switch to basic has the right stuff
 signals["svo system loaded"]:connect(function()
   sk.priosbeforechange = sk.getblankbeforestateprios()
+  sk.resumepriorityupdates()
 end, 'get initial state of prios')
 
 function sk.resetserversideprios()
-  svo.sendcuringprio("reset","affliction")
-  svo.sendcuringprio("list reset","defence")
+  sk.cancelpriorityupdates()
+  sk.cancelprioritydelivery()
+  for _, slow in ipairs({false, true}) do
+    svo.sendcuringprio("reset", "affliction", slow)
+    svo.sendcuringprio("list reset", "defence", slow)
+  end
   
 	sk.priochangecache = {
     special = {
@@ -47,6 +135,9 @@ function sk.resetserversideprios()
     }
 	}
   sk.priosbeforechange = sk.getblankbeforestateprios()
+  -- Classchange calls this immediately before reloading the native loaders.
+  -- Complete these four owned resets before that reload invalidates our FIFO.
+  sk.dosendprios()
 end
 
 function sk.sendpriorityswitch(action, balance, raffs, rdefs, cache, slow)
@@ -112,14 +203,21 @@ end
 
 function sk.updateserversideprios()
 --Don't do anything before we log in.
-  if svo.logging_in then return end 
-  
+  if not conf.serverside or sk.prioritydisconnected or svo.logging_in then
+    sk.cancelpriorityupdates()
+    return
+  end
+
   if not sk.priochangetimer then return end
   sk.updateserverwatch = sk.updateserverwatch or createStopWatch()
   startStopWatch(sk.updateserverwatch)
 
   -- don't notify of prio changes until the system is loaded, as they can get shuffled around a bit
   if not svo.systemloaded then return end
+  if sk.priorityneedsync or not sk.priosbeforechange then
+    sk.priosbeforechange = sk.getblankbeforestateprios()
+  end
+  sk.beginprioritysnapshot()
   local afterstate = sk.getafterstateprios()
   svo.debugf("sk.updateserverwatch sk.getafterstateprios: %s", getStopWatchTime(sk.updateserverwatch))
 
@@ -190,8 +288,10 @@ function sk.updateserversideprios()
       end
     end
   end
+  sk.endprioritysnapshot()
+  sk.priorityneedsync = nil
 
-  sk.priochangetimer = nil
+  sk.cancelpriorityupdates()
 
   -- save new state for next change
   svo.debugf("sk.updateserverwatch sk.getbeforestateprios: %s", getStopWatchTime(sk.updateserverwatch))
@@ -234,9 +334,7 @@ end
 svo.shouldignoreserverside = sk.shouldignoreserverside
 
 function sk.handleserversideswitch()
-  if not sk.priochangetimer then
-    sk.priochangetimer = tempTimer(0, function() sk.updateserversideprios() end)
-  end
+  sk.schedulepriorityupdate()
 end
 
 function sk.handleserversideswitch_keepup(defmode, action)
@@ -245,9 +343,7 @@ function sk.handleserversideswitch_keepup(defmode, action)
   -- don't do anything for the current defences mode
   if defmode ~= defs.mode then return end
 
-  if not sk.priochangetimer then
-    sk.priochangetimer = tempTimer(0, function() sk.updateserversideprios() end)
-  end
+  sk.schedulepriorityupdate()
 end
 
 -- splits defs up into another list and removes them from the affs one
@@ -481,11 +577,7 @@ end
 signals.sync:connect(function ()
   if not conf.serverside then return end
 
-  if sys.sync then
-    svo.sendc("curingset switch slowcuring")
-  else
-    svo.sendc("curingset switch normal")
-  end
+  svo.sendc("curingset switch "..sk.nativecuringset())
 end, 'update curingset on aeon/retardation')
 
 -- vconfig serverside
@@ -493,14 +585,8 @@ signals["svo config changed"]:connect(function(config)
   if config ~= 'serverside' then return end
 
   if conf.serverside then
-    sk.priochangecache = {
-      special = {
-        focustoggle = conf.focus
-      }
-    }
-    -- sync everything
-    sk.priosbeforechange = sk.getblankbeforestateprios()
-    svo.sendcuring("PRIORITY RESET")
+    sk.resetserversideprios()
+    -- sync everything, after the owned sets' ordered resets
     sk.priochangetimer = true
     sk.updateserversideprios()
     -- sync all special things like health
@@ -569,6 +655,9 @@ signals["svo config changed"]:connect(function(config)
     end
 
     svo.sendcuring("manathreshold "..conf.manause)
+  else
+    sk.cancelpriorityupdates()
+    sk.cancelprioritydelivery()
   end
 end, 'update serverside prios on config change')
 
@@ -882,6 +971,7 @@ function svo.setupserverside()
   -- already had it on when focuswithfulminated and focuswithguilt arrived
   -- would never send the game either switch. Send both at every login.
   sk.sendfocuswith()
+  sk.resumepriorityupdates()
 
   if svo.serversidesetup then killTimer(svo.serversidesetup) end
   svo.serversidesetup = tempTimer(5+svo.getping(), function()
@@ -945,6 +1035,8 @@ function svo.hitaliaslimit()
 
   svo.tntf_set('serverside', 'off', true)
 end
+
+sk.resumepriorityupdates()
 
 end -- end of svo serverside loader
 

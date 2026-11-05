@@ -55,12 +55,14 @@ sps.sp_fillup = function ()
   return t
 end
 
-if table.is_empty(sp_config) then
-  svo.sp_config = { parry = "", priority = {}, parry_actionlevel = {}, parry_shouldbe = sps.sp_fillup() }
-	sp_config = svo.sp_config
-	
-  sps.parry_currently = sps.sp_fillup()
-end
+-- Keep the public table shared by the policy, executor and saved configuration.
+sp_config.parry = sp_config.parry or ""
+sp_config.priority = sp_config.priority or {}
+sp_config.parry_shouldbe = sp_config.parry_shouldbe or sps.sp_fillup()
+sps.parry_currently = sps.parry_currently or sps.sp_fillup()
+
+-- Removed action-level API: native damage stages determine full parry.
+sp.setparrylevel = nil
 
 me.parry_currently = sps.parry_currently
 
@@ -72,8 +74,7 @@ sps.parry_options = {
   manual = "Allows you to manually control parry with the p* aliases."
 }
 
--- ask users to click on limbs for priority first, then ask for each limb in order to select action level,
--- then ask what to do with stancing when the action level happens, and what to do with parrying
+-- Ask users to order the limbs, then select a parry strategy.
 sps.install = {
   {
     check = function () return #sp_config.priority == table.size(sp_limbs) end,
@@ -92,45 +93,10 @@ sps.install = {
       end
       echo"\n"
     end},
-  --[[{
-    check = function ()
-        for limb,_ in pairs(sp_limbs) do
-          if sp_config.parry_actionlevel[limb] == nil then return false end
-        end
-        return true
-      end,
-    act = function (step)
-      local function makecodestrings(name)
-        local t = {}
-        t[#t+1] = 'svo.sp.setparrylevel("'..name..'", false, true)'
-        for amount = 275, 2000, 275 do
-          t[#t+1] = 'svo.sp.setparrylevel("'..name..'", '..amount..', true)'
-        end
-        return t
-      end
-      local function maketooltipstrings(name)
-        local t = {}
-        t[#t+1] = 'Set ' .. name .. ' to ' .. 'none'
-        for amount = 275, 2000, 275 do
-          t[#t+1] = 'Set ' .. name .. ' to ' .. amount
-        end
-        return t
-      end
-
-
-      svo.echof("Step %d - assign a level above which parry should act for for each limb by right-clicking, or use the %s command:", step, svo.green("vp parrylevel <limb> <amount, or 'none'>"))
-      echo "  "
-      for name, _ in pairs(sp_limbs) do
-        echoPopup(name, makecodestrings(name), maketooltipstrings(name))
-        echo(" ")
-      end
-      echo"\n"
-    end},
-]]
   {
     check = function () return sp_config.parry ~= "" end,
     act = function (step)
-      svo.echof("Step %d - decide what parry strategy to use when a limb is over the limit by clicking on it, or using the %s command:", step, svo.green("vp parrystrat <strategy>"))
+      svo.echof("Step %d - decide what parry strategy to use by clicking on it, or using the %s command:", step, svo.green("vp parrystrat <strategy>"))
       echo "  "
       for name, tooltip in pairs(sps.parry_options) do
         echoLink(name, 'svo.sp.setparry ("' .. name .. '", true)', tooltip)
@@ -157,7 +123,9 @@ end
 
 
 function sp.setup()
-  sp_config = { parry = "", priority = {}, parry_actionlevel = {}, parry_shouldbe = sps.sp_fillup() }
+  sp_config.parry = ""
+  for key in pairs(sp_config.priority) do sp_config.priority[key] = nil end
+  for limb in pairs(sp_config.parry_shouldbe) do sp_config.parry_shouldbe[limb] = false end
   sps.settingup = true
 
   sps.installnext()
@@ -219,29 +187,6 @@ function sp.setparry(option, echoback)
   sps.installnext()
 end
 
-function sp.setparrylevel(limb, amount, echoback)
-  local sendf
-  if echoback then sendf = svo.echof else sendf = svo.errorf end
-
-  if not sp_limbs[limb] then
-    sendf("Sorry, %s isn't a proper limb name. They are:\n  %s", limb, svo.oneconcat(sp_limbs))
-    return; end
-
-  if not tonumber(amount) and amount ~= false then
-    sendf("To what amount do you want to set %s to?", limb)
-    return; end
-
-  sp_config.parry_actionlevel[limb] = tonumber(amount)
-
-  if echoback then
-    svo.echof("Set the %s parry action level to %s", limb, amount and tostring(amount) or 'none')
-  end
-
-  for limbname,_ in pairs(sp_limbs) do
-    if sp_config.parry_actionlevel[limbname] == nil then return end
-  end
-  sps.installnext()
-end
 
 function svo.sp_setparry(what, echoback)
   local sendf
@@ -271,11 +216,6 @@ end
 sp.show = function ()
   svo.echof("Parry report:")
 
-  --[[svo.echof("Action levels:")
-  for limb, level in pairs(sp_config.parry_actionlevel) do
-    echo"  " svo.echof("%s: parry %s", limb, tostring(level))
-  end]]
-
   svo.echof("Limb priorities: %s", table.concat(sp_config.priority, ", "))
   svo.echof("Parry strategy: %s (currently parrying: %s)", type(sp_config.parry) == 'string' and sp_config.parry or "custom function",
 
@@ -287,6 +227,17 @@ sp.show = function ()
 
     return table.concat(parrying_list, ", ") end)())
 end
+
+-- These are svof's native affliction names: mangled is game damaged,
+-- mutilated is game mangled. Head concussion and torso trauma are separate.
+local parry_damage_affs = {
+  ["right arm"] = {"mangledrightarm", "mutilatedrightarm"},
+  ["left arm"] = {"mangledleftarm", "mutilatedleftarm"},
+  ["right leg"] = {"mangledrightleg", "mutilatedrightleg"},
+  ["left leg"] = {"mangledleftleg", "mutilatedleftleg"},
+  head = {"mildconcussion", "seriousconcussion"},
+  torso = {"mildtrauma", "serioustrauma"},
+}
 
 svo.sp_checksp = function ()
   -- check parry
@@ -300,7 +251,8 @@ svo.sp_checksp = function ()
     local alreadyset
     for i = 1, #prios do
       local limb = prios[i]
-      if not alreadyset and type(sp_config.parry_actionlevel[limb]) == 'number' and (affs['mangled'..limb] or (limb == 'head' and (affs.serioustrauma or affs.mildtrauma)) or (limb == 'torso' and (affs.mildconcussion or affs.seriousconcussion))) then
+      local damage = parry_damage_affs[limb]
+      if not alreadyset and damage and (affs[damage[1]] or affs[damage[2]]) then
         sp_config.parry_shouldbe[limb] = true
         alreadyset = true
       else
@@ -411,6 +363,9 @@ if lfs.attributes(sp_config_path) then
     end)
   end
 end
+
+-- Old saved configurations may still contain the unused numeric thresholds.
+sp_config.parry_actionlevel = nil
 
 end -- end of svo parry loader
 

@@ -13,7 +13,22 @@
 local function ndb_load()
 
 local me = svo.me
+me.watchfor = me.watchfor or {}
+me.highlightignore = me.highlightignore or {}
 local firstload = not ndb.ismhaldorian
+
+-- Mudlet continues loading sibling scripts after a script error. If authority
+-- migration failed, retain SQLite/personal data but never expose rolled-back
+-- legacy identity as authoritative facts through readers or highlights.
+local function fetch_people(...)
+  local rows = db.fetch(db, ndb.db.people, ...)
+  if not ndb.authority_ready then
+    for _, person in ipairs(rows) do
+      for key, value in pairs(ndb.fact_defaults) do person[key] = value end
+    end
+  end
+  return rows
+end
 
 svo.pl.dir.makepath(getMudletHomeDir() .. "/svo/namedb")
 
@@ -50,60 +65,63 @@ end, 'vacuum namedb database')
 
 --ndb.API
 function ndb.ismhaldorian(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Mhaldor'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Mhaldor'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.iscyrenian(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Cyrene'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Cyrene'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.isshallamese(name)
-  return #(db:fetch(ndb.db.people, {db:OR(db:eq(ndb.db.people.city, 'Shallam'), db:eq(ndb.db.people.city, 'Targossas')), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:OR(db:eq(ndb.db.people.city, 'Shallam'), db:eq(ndb.db.people.city, 'Targossas')), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.istargossian(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Targossas'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Targossas'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.iseleusian(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Eleusis'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Eleusis'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.isashtani(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Ashtan'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Ashtan'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.ishashani(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Hashan'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Hashan'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.isundead(name)
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.city, 'Undead'), db:eq(ndb.db.people.name, name)})) ~= 0
+  if not ndb.authority_ready then return false end
+  return #(fetch_people({db:eq(ndb.db.people.city, 'Undead'), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 				
 function ndb.isclass(name, class)
+  if not ndb.authority_ready then return false end
   name, class = name:title(), class:lower()
-  return #(db:fetch(ndb.db.people, {db:eq(ndb.db.people.class, class), db:eq(ndb.db.people.name, name)})) ~= 0
+  return #(fetch_people({db:eq(ndb.db.people.class, class), db:eq(ndb.db.people.name, name)})) ~= 0
 end
 
 function ndb.getclass(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
   return r[1].class:lower()
 end
 
-function ndb.setclass(name, class)
-  class = class:lower()
-  svo.assert(ndb.isvalidclass(class), "ndb.setclass: invalid class given")
-
-  ndb.fixed_set(ndb.db.people.class, class, db:eq(ndb.db.people.name, name))
-end
 
 function ndb.getcity(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
   return r[1].city
@@ -111,7 +129,7 @@ end
 
 function ndb.getnotes(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
   return r[1].notes
@@ -119,7 +137,7 @@ end
 
 function ndb.getxprank(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
   return r[1].xp_rank
@@ -127,39 +145,32 @@ end
 
 function ndb.ismark(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
-  if r[1].mark == "" then return false
+  if r[1].mark == "" then return nil, "unknown"
   else return r[1].mark end
 end
 
-function ndb.setmark(name, type)
-  if type == false then type = "" end
-
-  ndb.fixed_set(ndb.db.people.mark, type, db:eq(ndb.db.people.name, name))
-end
 
 function ndb.isinfamous(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
-  if r[1].infamous == "" then return false
+  if r[1].infamous == "" then return -1
   else return r[1].infamous end
 end
 
-function ndb.setinfamous(name, infamy)
-  ndb.fixed_set(ndb.db.people.infamous, infamy, db:eq(ndb.db.people.name, name))
-end
 
 function ndb.isdragon(name)
   svo.assert(name, "ndb.isdragon() requires a name")
 
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
+  if r[1].dragon == -1 then return nil, "unknown" end
   return (r[1].dragon == 1 and true or false)
 end
 
@@ -167,32 +178,28 @@ function ndb.getcityrank(name)
   svo.assert(name, "ndb.getcityrank() requires a name")
 
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
 
-  return ndb.valid.cityranks[r[1].city][r[1].city_rank]
+  return ndb.valid.cityranks[r[1].city] and ndb.valid.cityranks[r[1].city][r[1].city_rank] or nil
 end
 
-function ndb.setdragon(name, status)
-  status = svo.toboolean(status) and 1 or 0
-
-  ndb.fixed_set(ndb.db.people.dragon, status, db:eq(ndb.db.people.name, name))
-end
 
 function ndb.isimmortal(name)
   name = name:title()
-  local r = db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))
+  local r = fetch_people(db:eq(ndb.db.people.name, name))
   if not next(r) then return nil, "name not known" end
+  if r[1].immortal == -1 then return nil, "unknown" end
 
   return (r[1].immortal == 1 and true or false)
 end
 
 function ndb.exists(name)
-  return #(db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))) ~= 0
+  return #(fetch_people(db:eq(ndb.db.people.name, name))) ~= 0
 end
 
 function ndb.isperson(name)
-  return #(db:fetch(ndb.db.people, db:eq(ndb.db.people.name, name))) ~= 0
+  return #(fetch_people(db:eq(ndb.db.people.name, name))) ~= 0
 end
 
 -- returns true only if a certain enemy
@@ -214,9 +221,7 @@ end
 -- returns true if they are a soldier of their city
 function ndb.issoldier(name)
   local p = ndb.getname(name)
-  if not p then return false end
-
-  local soldier = p.soldier
+  if not p or p.city_soldier == -1 then return nil, "unknown" end
 
  -- only return true for soldier of their city
   if p.city_soldier == -2 then
@@ -255,7 +260,7 @@ end
 
 -- given a title, returns all info about a person
 function ndb.getnamebytitle (title)
-  return db:fetch(ndb.db.people, db:in_(ndb.db.people.name, string.split(title, " ")))
+  return fetch_people(db:in_(ndb.db.people.name, string.split(title, " ")))
 end
 
 -- given a line, returns the first name it finds, if any
@@ -281,7 +286,7 @@ end
 
 -- given a name, returns all info about a person
 function ndb.getname (name)
-  return db:fetch(ndb.db.people, db:eq(ndb.db.people.name, string.title(name)))[1]
+  return fetch_people(db:eq(ndb.db.people.name, string.title(name)))[1]
 end
 
 local singular_city = {
@@ -353,7 +358,7 @@ local function getcolor(name)
   local city, order, conf, color = person.city, person.order, svo.conf
 
   -- order of priority: watchfor > divine > city > order > house > citizens.
-  if (city == "" or city == 'rogue') then city = "" else city = city:lower() end -- known rogues are returned as ""
+  city = city:lower()
 
   -- color first
   if conf.highlightwatchfor and svo.me.watchfor[name] then
@@ -374,7 +379,7 @@ local function getcolor(name)
   elseif order and conf['highlight'..order] then
     color     = conf[order..'color'] or 'a_darkwhite'
 
-  elseif city == "" and conf.highlightrogues then
+  elseif city == "rogue" and conf.highlightrogues then
     color     = conf.roguescolor or 'a_darkwhite'
 
   elseif city ~= "" and conf['highlight'..city] then
@@ -424,24 +429,19 @@ for _, format in ipairs{'bold', 'underline', 'italicize'} do
            (conf[format..'house'] and person.houseenemy == 1)      or
            (conf[format..'divine'] and person.immortal == 1)       or
            (order and conf[format..order])                         or
-           ((city == "" or city == 'rogue') and conf[format..'rogues']) or
+           ((city == 'rogue') and conf[format..'rogues']) or
            (city and conf[format..city])                           or false
   end
 end
 
 function ndb.addname(name)
-  local temp_name_list = {}
-
-  if type(name) == 'table' then
-    for i = 1, #name do
-      temp_name_list[#temp_name_list+1] = {name = name[i]:title()}
-    end
+  local rows = {}
+  if type(name) == "table" then
+    for _, value in ipairs(name) do rows[#rows + 1] = {name = value} end
   else
-    temp_name_list = {{name = name:title()}}
+    rows[1] = {name = name}
   end
-
-  db:merge_unique(ndb.db.people, temp_name_list)
-
+  ndb.merge_discovery(rows)
   raiseEvent("NameDB got new data")
 end
 
@@ -466,7 +466,7 @@ function ndb.setiff(name, status)
     [category] = towhat
   }}
 
-  db:merge_unique(ndb.db.people, temp_name_list)
+  ndb.merge_discovery(temp_name_list)
 end
 
 -- ndb.support
@@ -494,128 +494,23 @@ function ndb.findfromtable(input, valid)
   end
 end
 
-function ndb.showinfamous()
-  local infamous = {}
-  for _, person in pairs(db:fetch(ndb.db.people, db:gte(ndb.db.people.infamous, 1))) do
-    local infamy = ndb.isinfamous(person.name)
-
-    if infamy and infamy >= 1 then
-      infamous[infamy] = infamous[infamy] or {}
-      infamous[infamy][#infamous[infamy]+1] = person.name
-    end
-  end
-
-  svo.echof("Infamous names known in NameDB:")
-  if not next(infamous) then svo.echof("(none found)") end
-  for cat, people in pairs(infamous) do
-    table.sort(people)
-    echo(string.format("  %s: %s\n", ndb.valid.shortinfamous[cat], svo.concatand(people)))
-  end
-  svo.showprompt()
-end
 
 function ndb.showhelp(entry)
   svo.echof("<0,250,0>"..ndb.help[entry].term.."<47,79,79>: "..svo.getDefaultColor()..table.concat(ndb.help[entry].definition, "\n"))
   svo.showprompt() echo'\n'
 end
 
-function ndb.honors(name, type)
-  if ndb.honorsid then svo.echof("ndb.honors() for %s called, when already honours'ing %s - not going to do this.", name:title(), ndb.honorsname:title()) return end
-  name = string.title(name)
-
-  enableTrigger('Honors')
-
-  if ndb.honorsid then killTimer(ndb.honorsid) end
-  ndb.honorsid = tempTimer(2+getNetworkLatency(), function()
-    disableTrigger('Honors')
-    svo.echof("Honors on %s didn't happen - re-checking...", name)
-    ndb.honorsid, ndb.gaghonours = nil, nil
-    ndb.honors(name, type)
-  end)
-
-  ndb.honorsname = name
-  send("honorsb " .. name, false) -- needs to full so it sees the clan listing
-
-  if type == 'quiet' then ndb.gaghonours = true end
-end
-
-function ndb.cancelhonors(quietly)
-  ndb.manualcheck = nil
-  ndb.checkingqwi = nil
-
-  if (ndb.honorslist and next(ndb.honorslist)) or ndb.honorsid then
-    ndb.honorslist = {}
-    if ndb.honorsid then killTimer(ndb.honorsid) disableTrigger('Honors') end; ndb.honorsid = nil
-    if not quietly then svo.echof("Cancelled honors-checking people.") end
-  else
-    if not quietly then svo.echof("Not checking anyone atm already.") end
-  end
-  if not quietly then svo.showprompt() end
-
-  ndb.hidehonorswindow()
-end
 
 function ndb.getrankincity(city, name)
   city, name = city:title(), name:title()
   if ndb.valid.cityranks[city] then return ndb.valid.cityranks[city][name] end
 end
 
--- update all info that we should be able to glean from honors.
--- might: if it's at -1, then it's default known
--- rank: -1 default unknown, -2 unranked
-function ndb.updatebyhonors()
-  -- took might check off, as the website doesn't show it
-  if not svo.conf.usehonors then return end -- Achaea disallowed use of website scraping, can only honors on a 2s eq
-
-  local data = db:fetch(ndb.db.people, db:AND(db:not_eq(ndb.db.people.immortal, 1), db:eq(ndb.db.people.xp_rank, -1)))
-
-  ndb.honorslist = (function ()
-    local t = {}
-    for _,j in ipairs(data) do
-      -- sanity check for weird names
-      if j.name:find("^%u%l+$") then t[j.name] = true
-      else db:delete(ndb.db.people, db:eq(ndb.db.people.name, j.name)) end
-    end return t end)()
-
-    if svo.conf.paused or not next(ndb.honorslist) then return end
-
-    if not svo.conf.autocheck and not ndb.manualcheck then
-      if table.size(ndb.honorslist) > 1 then
-        echo'\n'
-        if table.size(ndb.honorslist) <= 10 then
-          svo.echofn("Got new names (%s), use '", svo.oneconcat(ndb.honorslist))
-          setFgColor(unpack(svo.getDefaultColorNums))
-          setUnderline(true)
-          echoLink("ndb honorsnew", 'ndb.manualcheck = true; ndb.updatebyhonors()', 'Click to do ndb honorsnew', true)
-          setUnderline(false)
-          echo("' to check them.\n")
-        else
-          svo.echofn("Got %d new names, use '", table.size(ndb.honorslist))
-          setFgColor(unpack(svo.getDefaultColorNums))
-          setUnderline(true)
-          echoLink("ndb honorsnew", 'ndb.manualcheck = true; ndb.updatebyhonors()', 'Click to do ndb honorsnew', true)
-          setUnderline(false)
-          echo("' to check them.\n")
-        end
-      end
-
-      return
-    end
-
-    -- don't show anymore - checking isn't so intrusive anymore
-    -- if table.size(ndb.honorslist) <= 10 then
-    --   echo'\n' svo.echof("Have new names (%s) - going to check them.", svo.oneconcat(ndb.honorslist))
-    -- else
-    --   echo'\n' svo.echof("Have %s new names - going to check them.", table.size(ndb.honorslist))
-    -- end
-
-  if not ndb.honorsid then ndb.honors_next() end
-end
 
 function ndb.doexport()
   if not ndb.exportdata.location then return nil, "no export location" end
 
-  local alldata = db:fetch(ndb.db.people)
+  local alldata = fetch_people()
 
   if not alldata or not next(alldata) then svo.echof("Your NameDB is empty! Check 'qw', 'citizens' to start filling it up. There's nothing to export otherwise...") return end
 
@@ -665,7 +560,9 @@ function ndb.getimportfields()
   table.load(ndb.importdata.location, ndb.importdata.data)
   if not ndb.importdata.data then svo.echof("Couldn't read the file - maybe it's corrupted? Try another.") return end
 
-  for k,_ in pairs(ndb.importdata.data.meta.fields) do if ndb.schema.people[k] then ndb.importdata.fields[k] = true end end
+  for k in pairs(ndb.importdata.data.meta.fields) do
+    if k == "name" or ndb.policy_fields[k] then ndb.importdata.fields[k] = true end
+  end
 end
 
 function ndb.doimport()
@@ -683,20 +580,14 @@ function ndb.doimport()
     }
 
     for k,v in pairs(p) do
-      if ndb.importdata.fields[k] then
+      if ndb.importdata.fields[k] and ndb.policy_fields[k] then
         temp_name_list[#temp_name_list][k] = v
       end
     end
   end
 
-  db:merge_unique(ndb.db.people, temp_name_list)
+  ndb.merge_discovery(temp_name_list)
   svo.echof("Imported %d name%s okay.", #temp_name_list, (#temp_name_list == 1 and '' or 's'))
-
-  local c = #(db:fetch(ndb.db.people, db:eq(ndb.db.people.city, 'Shallam')))
-  if c ~= 0 then
-    ndb.fixed_set(ndb.db.people.city, 'Targossas', db:eq(ndb.db.people.city, 'Shallam'))
-    svo.echof("Migrated "..c.." Shallamese to be called Targossians now.")
-  end
 
   raiseEvent("NameDB got new data")
   ndb.importdata.data = nil
@@ -712,7 +603,7 @@ function ndb.loadhighlights()
 
   local highlight, watchfor = ndb.singlehighlight, svo.me.watchfor
 
-  local dbnames = db:fetch(ndb.db.people)
+  local dbnames = fetch_people()
 
   for i = 1, #dbnames do
     highlight(dbnames[i].name,
@@ -732,6 +623,7 @@ end
 function ndb.singlehighlight(name, city, order, cityenemy, orderenemy, houseenemy, watchfor, immortal)
   if ndb.highlightIDs and ndb.highlightIDs[name] then
     killTrigger(ndb.highlightIDs[name])
+    ndb.highlightIDs[name] = nil
   end
 
   if name == svo.me.name or svo.me.highlightignore[name] or svo.conf.ndbpaused then return end
@@ -763,7 +655,7 @@ function ndb.singlehighlight(name, city, order, cityenemy, orderenemy, houseenem
   elseif order and conf['highlight'..order] then
     color     = conf[order..'color'] or 'a_darkwhite'
 
-  elseif (city == "" or city == 'rogue') and conf.highlightrogues then
+  elseif (city == 'rogue') and conf.highlightrogues then
     color     = conf.roguescolor or 'a_darkwhite'
 
   elseif city and conf['highlight'..city] then
@@ -777,7 +669,7 @@ function ndb.singlehighlight(name, city, order, cityenemy, orderenemy, houseenem
                 (conf.boldhouse and houseenemy == 1)      or
                 (conf.bolddivine and immortal == 1)       or
                 (order and conf['bold'..order])           or
-                ((city == "" or city == 'rogue') and conf.boldrogues) or
+                ((city == 'rogue') and conf.boldrogues) or
                 (city and conf['bold'..city])
 
   underline = (conf.underlinewatchfor and watchfor)       or
@@ -786,7 +678,7 @@ function ndb.singlehighlight(name, city, order, cityenemy, orderenemy, houseenem
                 (conf.underlinehouse and houseenemy == 1) or
                 (conf.underlinedivine and immortal == 1)  or
                 (order and conf['underline'..order])      or
-                ((city == "" or city == 'rogue') and conf.underlinerogues) or
+                ((city == 'rogue') and conf.underlinerogues) or
                 (city and conf['underline'..city])
 
   italicize = (conf.italicizewatchfor and watchfor)       or
@@ -795,7 +687,7 @@ function ndb.singlehighlight(name, city, order, cityenemy, orderenemy, houseenem
                 (conf.italicizehouse and houseenemy == 1) or
                 (conf.italicizedivine and immortal == 1)  or
                 (order and conf['italicize'..order])      or
-                ((city == "" or city == 'rogue') and conf.italicizerogues) or
+                ((city == 'rogue') and conf.italicizerogues) or
                 (city and conf['italicize'..city])
 
   if not (color or bold or underline or italicize) then return end
@@ -843,90 +735,25 @@ function ndb.highlight(who, color, bold, underline, italicize)
   end
 end
 
-function ndb.finished_honors(event, name, type)
-  if svo.conf.paused or not ndb.honorslist then return end
-  local type = ndb.gaghonours and 'quiet' or 'manual'
 
-  local name = next(ndb.honorslist or {})
-  if not name then
-    if type ~= 'manual' then
-      echo'\n'
-      svo.echof("Done checking all new names.")
-      svo.showprompt()
-      raiseEvent("NameDB finished all honors")
-    end
-
-    ndb.manualcheck = nil
-    ndb.hidehonorswindow()
-    return
-  end
-end
-
-function ndb.honors_next(argument)
-  if not svo.conf.autocheck and not ndb.manualcheck then return end
-  if svo.conf.usehonors and not svo.bals.equilibrium then return end
-  if not svo.conf.usehonors and argument then return end -- argument is passed if this comes from a balance,
-                                                         -- which is for usehonors only - with it off, autohonors will start many honors processes
-
-  local name = next(ndb.honorslist or {})
-  if not name then return end
-
-  if svo.conf.usehonors then
-    ndb.honors(name, 'quiet')
-  else
-    --ndb.getinfo(name) -- Achaea disallowed use of website scraping
-    return
-  end
-
-  ndb.honorslist[name] = nil
-  local left = table.size(ndb.honorslist)
-
-  local timeleft = {}
-  if svo.conf.usehonors then
-    -- honors takes 2s eq
-    local leftseconds = left * 2
-
-    local h,m,s = seconds2human(leftseconds)
-    if h > 0 then
-      timeleft[#timeleft+1] = h..'h'
-    end
-    if h > 0 and m > 0 then
-      timeleft[#timeleft+1] = ", "
-    end
-    if m > 0 then
-      timeleft[#timeleft+1] = m..'m'
-    end
-    if m > 0 and s > 0 then
-      timeleft[#timeleft+1] = ", "
-    end
-    if s > 0 then
-      timeleft[#timeleft+1] = s..'s'
-    end
-  end
-
-  ndb.showhonorswindow(string.format("Checking %s, %s name%s%s left to check...\n", name, left, (left == 1 and '' or 's'), (next(timeleft) and '('..table.concat(timeleft)..')' or '')))
-end
-registerAnonymousEventHandler("svo got balance", "ndb.honors_next")
-local luanotify = {}
-luanotify.signal = require("notify.signal")
-svo.signals["namedb finished honors"] = luanotify.signal.new()
-svo.signals["namedb finished honors"]:connect(ndb.honors_next, 'run honors_next once finished with one')
-
--- sk.togglehonors = function()
---   if svo.conf.usehonors then
---     svo.signals["namedb finished honors"]:block(ndb.honors_next)
-
--- end
--- svo.signals["svo config changed"]:connect(sk.togglehonors)
-
-
-if firstload then ndb.configs() end
+ndb.configs()
 ndb.loadhighlights()
+if ndb.pending_facts_reset then
+  ndb.pending_facts_reset = nil
+  raiseEvent("NameDB facts reset")
+end
 
 end
 
+if ndb.load_handler then
+  killAnonymousEventHandler(ndb.load_handler)
+  ndb.load_handler = nil
+end
 if svo and svo.systemloaded then
   ndb_load()
 else
-  registerAnonymousEventHandler("svo system loaded", ndb_load, true)
+  ndb.load_handler = registerAnonymousEventHandler("svo system loaded", function()
+    ndb.load_handler = nil
+    ndb_load()
+  end, true)
 end

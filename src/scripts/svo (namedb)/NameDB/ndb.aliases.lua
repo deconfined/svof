@@ -1,123 +1,36 @@
 function ndb.showwhois(whom)
-  whom = whom:lower():title()
-  local data = ndb.getname(whom)
-
-  if not data then svo.echof("I'm afraid we don't know person named %s.", matches[2]:title()) svo.showprompt() return end
-
-  cecho("\n<a_darkblue>--<purple>(svo) <a_grey>"..data.name.."'s ("..data.gender:sub(1,1)..") NameDB profile<a_darkblue>" .. ("-"):rep(55-#data.name) .. "\n")
-
-  local function getclass()
-    return (data.class == '' and 'unknown' or data.class)
+  local name, err = ndb.canonical_name(whom)
+  if not name then svo.echof("%s", err); return end
+  local data = ndb.getname(name)
+  if not data then
+    ndb.lookup(name)
+    svo.echof("Looking up %s over HTTPS; use whois %s after completion.", name, name)
+    return
   end
-
-  local function getxprank()
-    return (data.xp_rank == -2 and 'unranked' or (data.xp_rank == -1 and 'unknown' or data.xp_rank))
+  local function known(value)
+    if value == "" or value == nil or value == -1 then return "unknown" end
+    return tostring(value)
   end
-
-  local function getmight()
-    return (data.might == -1 and 'unranked' or data.might)
-  end
-
-  local function getlevel()
-    return ((data.level == -1 or data.level == 0 or data.level == nil) and 'unknown' or data.level)
-  end
-
-  local function getcombatrank()
-    return (data.combat_rank > 0
-       and ("%d (rank) %d (score)"):format(data.combat_rank, data.combat_rating)
-       or (data.combat_rank == 0 and 'unranked' or 'unknown'))
-  end
-
-  local function getdragon()
-    return (data.dragon == 1 and 'yep' or 'nope')
-  end
-
-  local function getrace()
-    return (data.race == '' and 'unknown' or data.race)
-  end
-
-  local function getbirthday()
-    return ((data.birth_day ~= 0
-       and ("%d %s(%d) %d"):format(data.birth_day, ndb.valid.months[data.birth_month], data.birth_month, data.birth_year)
-       or '') .. (data.birth_hidden == 1 and ' (h)' or ''))
-
-  end
-
-  local function getimportance()
-    return (data.importance == 0 and 'unset' or data.importance)
-  end
-
-  local function getinfamous()
-    return (data.infamous == -1 and 'unknown' or (data.infamous == 0 and 'none' or ndb.valid.shortinfamous[data.infamous]))
-  end
-
-  if data.immortal == 0 then
-    cecho("<a_darkcyan>  Orgs:\n")
-    cecho(string.format("<a_darkgrey>    House:  %-24s City:        %s (cr%s)%s\n",
-      (data.guild == '' and 'unknown' or data.guild),
-      (data.city == '' and 'unknown' or data.city),
-      (data.city_rank == 0 and '?' or data.city_rank),
-      (data.city_soldier == 0 and '' or ' (S)')
-    ))
-
-    cecho(string.format("<a_darkgrey>    Order:  %-24s Mark:        %s\n",
-      (data.order == '' and 'unknown' or data.order),
-      (data.mark == '' and 'no' or data.mark)
-    ))
-
-    cecho("\n<a_darkcyan>  Personal:\n")
-    cecho(string.format("<a_darkgrey>    Class:  %-24s Infamy:      %s\n",
-      getclass(),
-      getinfamous()
-    ))
-    cecho(string.format("<a_darkgrey>    Level:  %-24s XP rank:     %s\n",
-      getlevel(),
-      getxprank()
-    ))
-    cecho(string.format("<a_darkgrey>    Might:  %-24s Combat:      %s\n",
-      getmight(),
-      getcombatrank()
-    ))
-    cecho(string.format("<a_darkgrey>    Dragon: %-24s Race:        %s\n",
-      getdragon(),
-      getrace()
-    ))
-    cecho(string.format("<a_darkgrey>    Birth:  %-24s Importance:  %s\n",
-      getbirthday(),
-      getimportance()
-    ))
-    
-    cecho("\n<a_darkcyan>  Status to you:\n")
-    cecho(string.format("<a_darkgrey>    City enemy:  %-19s House enemy: %s\n",
-      (data.cityenemy == 0 and 'nope' or 'yep'),
-      (data.houseenemy == 0 and 'nope' or 'yep')
-    ))
-
-    cecho(string.format("<a_darkgrey>    Order enemy: %-19s \n",
-      data.orderenemy == 0 and 'nope' or 'yep'
-    ))
-
-    local currenstatus
-    if data.iff == -1 then
-      if ndb.isenemy(data.name) then currenstatus = "enemy (auto)"
-      else currenstatus = "ally (auto)" end
-    end
-
-    cecho(string.format("<a_darkgrey>    Actual status to you: %s\n", 
-      (data.iff == -1 and currenstatus or (data.iff == 1 and "enemy (manual)" or "ally (manual)"))
-    ))
-  else
-    cecho("\n<a_darkcyan>    They are an Immortal.\n")
-  end
-
-  cecho("\n<a_darkcyan>  Notes (")
-  setUnderline(true)
-  fg("a_darkcyan")
-  echoLink("edit", 'printCmdLine"ndb set '..whom:title()..' notes '..data.notes:gsub("\n", [[\\n]])..'"', 'Click to edit the notes you have on '..whom:title()..' - you can use \\n for a linebreak, and <color> to color text', true)
+  svo.echof("%s — NameDB (%s)", name,
+    data.api_verified == 1 and ("official API, " .. os.date("%Y-%m-%d %H:%M", data.api_updated)) or "facts unknown")
+  echo("  Full name: " .. known(data.title) .. "\n")
+  echo("  Class: " .. known(data.class) .. "  City: " .. known(data.city) .. "  House: " .. known(data.guild) .. "\n")
+  echo("  Level: " .. known(data.level) .. "  XP rank: " .. (data.xp_rank == -2 and "unranked" or known(data.xp_rank)) .. "\n")
+  echo("  Mob kills: " .. known(data.mob_kills) .. "  Player kills: " .. known(data.player_kills) ..
+    "  Explorer rank: " .. known(data.explorer_rank) .. "\n")
+  echo("  Gender, race, order, city rank/soldier, dragon, immortal, mark,\n")
+  echo("  infamy, might, combat rank, birth, arms, divorces, motto and warcry:\n")
+  echo("  unknown (not supplied by the official API).\n")
+  echo("  Personal policies: IFF " .. (data.iff == 1 and "enemy" or data.iff == 2 and "ally" or "automatic") ..
+    ", effective " .. (ndb.isenemy(name) and "enemy" or "not enemy") .. ", importance " .. data.importance .. "\n")
+  echo("  City enemy: " .. (data.cityenemy == 1 and "yes" or "no") ..
+    "  House enemy: " .. (data.houseenemy == 1 and "yes" or "no") ..
+    "  Order enemy: " .. (data.orderenemy == 1 and "yes" or "no") .. "\n")
+  cecho("  Notes: " .. (data.notes ~= "" and data.notes or "none") .. "\n")
   resetFormat()
-  cecho("<a_darkcyan>):\n")
-  cecho(string.format("    <a_blue>- <a_grey>"..((data.notes and data.notes ~= "") and data.notes:gsub("\n", "\n    <a_blue>-<reset> ") or "none yet").."\n"))
-  deselect() fg("a_darkblue") echo(string.rep("-", 80)) resetFormat() echo'\n'
+  echoLink("Edit notes", ("printCmdLine(%q)"):format("ndb set " .. name .. " notes " .. data.notes:gsub("\n", [[\n]])),
+    "Edit personal notes; API refreshes never replace these.", true)
+  echo("\n")
   svo.showprompt()
 end
 
@@ -219,12 +132,51 @@ function ndb.importmenu()
 end
 
 function ndb.checkqw(suffix, how)
-  if ndb.qwtimer then killTimer(ndb.qwtimer) end
+  ndb.qwtype = how or "names"
+  ndb.lookup_online(how == "update")
+end
 
-  enableTrigger("NameDB qw")
-  enableTrigger("NameDB qw 2")
-  ndb.qwtimer = tempTimer(3, function() disableTrigger("NameDB qw"); disableTrigger("NameDB qw 2"); ndb.qwtimer = nil end)
-  ndb.qwtype = how
-
-  send("qwc", false)
+function ndb.show_online()
+  local names = ndb.last_online or {}
+  local how = ndb.qwtype
+  ndb.qwtype = nil
+  if not how then return end
+  if how == "organize cities" then
+    local cities = {}
+    for _, name in ipairs(names) do
+      local city = ndb.getcity(name)
+      if not city or city == "" then city = "unknown" end
+      cities[city] = cities[city] or {}
+      cities[city][#cities[city] + 1] = name
+    end
+    local sorted = {}
+    for city, members in pairs(cities) do sorted[#sorted + 1] = {city = city, members = members} end
+    table.sort(sorted, function(a, b)
+      if #a.members == #b.members then return a.city < b.city end
+      return #a.members > #b.members
+    end)
+    svo.echof("Online names by cached API city (unknown is not rogue):")
+    for _, group in ipairs(sorted) do
+      table.sort(group.members)
+      echo(("  %s (%d): %s\n"):format(group.city, #group.members, table.concat(group.members, ", ")))
+    end
+  elseif how:match("^report members of ") then
+    local org = how:match("^report members of (%w+)"):lower()
+    local members = {}
+    for _, city in ipairs(ndb.valid.cities) do
+      if city:lower():sub(1, #org) == org then
+        org = city
+        for _, name in ipairs(names) do
+          if ndb.getcity(name) == city then members[#members + 1] = name end
+        end
+        break
+      end
+    end
+    table.sort(members)
+    if #members == 0 then svo.echof("No online names have a verified cached city of %s.", org)
+    else svo.cc("%s %s visible (cached API city): %s", #members, ndb.getpluralcity(org, #members), table.concat(members, ", ")) end
+  else
+    table.sort(names)
+    svo.echof("Official API online list (%d): %s", #names, table.concat(names, ", "))
+  end
 end

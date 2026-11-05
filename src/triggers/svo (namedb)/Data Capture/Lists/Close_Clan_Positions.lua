@@ -10,6 +10,6 @@ for k,v in pairs(clanNames) do
   end
   added[v] = true
 end
-db:merge_unique(ndb.db.people, clan_name_list)
+ndb.merge_discovery(clan_name_list)
 raiseEvent("NameDB got new data")
 clanNames = nil

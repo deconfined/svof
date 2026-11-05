@@ -24,5 +24,59 @@
         "type": "regex"
       }
     ]
+  },
+  {
+    "name": "Incandescence start",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^A brilliant glow begins to emanate from within the raging inferno that is (\\w+)\\.",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Incandescence activation",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^A burning column of fire descends upon (\\w+), cloaking \\w+ with its brilliance\\. The flames merge with those that already cloak \\w+, and \\w+ becomes little more than an incandescent pillar of light\\.",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Incandescence room",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "Wreathed in torrid fury, the Elemental Lord (\\w+) blazes bright\\. (.*)\\. (\\w+) is little more than a searing column of incandescent light\\.",
+        "type": "regex"
+      }
+    ]
   }
 ]

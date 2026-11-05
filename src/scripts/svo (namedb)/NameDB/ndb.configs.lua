@@ -45,61 +45,24 @@ function ndb.setuporders()
 end
 
 function ndb.configs()
-  if svo.conf.autocheck == nil then svo.conf.autocheck = true end
-  if svo.conf.ndbpause == nil then svo.conf.ndbpause = false end
-  if svo.conf.usehonors == nil then svo.conf.usehonors = false end
-
-  svo.config.setoption("usehonors", {
-    type = "boolean",
-    vconfig2string = true,
-    onenabled = function () svo.echof("<0,250,0>Will%s make use of honors when checking new people, which'll allow NameDB to capture more information.", svo.getDefaultColor()) end,
-    ondisabled = function () svo.echof("<250,0,0>Won't%s make use of honors when checking new people.", svo.getDefaultColor()) end
-  })
-
-  svo.config.setoption("autocheck", {
-    type = "boolean",
-    vconfig2string = true,
-    onenabled = function () svo.echof("<0,250,0>Will%s automatically, and quietly, honors new people we come across.", svo.getDefaultColor()) ndb.updatebyhonors() end,
-    ondisabled = function () svo.echof("<250,0,0>Won't%s automatically honors new people. Use 'ndb honorsnew' to clear the new names backlog manually.", svo.getDefaultColor()) ndb.cancelhonors(true) end,
-    onshow = function (defaultcolour)
-      fg("gold")
-      echoLink("NameDB:", "", "svo NameDB", true)
-      fg(defaultcolour) echo(" ")
-      fg("a_cyan") echoLink(svo.conf.autocheck and "Auto-checking" or "Not auto-checking", "svo.config.set('autocheck', "..(svo.conf.autocheck and "false" or "true")..", true)", "Click to "..(svo.conf.autocheck and "disable" or "enable").." automatic name checks on new people that we see", true)
-      fg(defaultcolour)
-      echo(" new people, highlighting names is ")
-      fg(defaultcolour)
-      fg("a_cyan") echoLink(not svo.conf.ndbpaused and "on" or "off", "svo.config.set('ndbpaused', "..(svo.conf.ndbpaused and "false" or "true")..", true)", "Click to "..(svo.conf.ndbpaused and "start" or "stop").." highlighting names", true)
-      fg(defaultcolour)
-      echo(", ")
-      fg("a_cyan") echoLink(svo.conf.usehonors and "will" or "won't", "svo.config.set('usehonors', "..(svo.conf.usehonors and "false" or "true")..", true)", "Click to "..(not svo.conf.usehonors and "enable" or "disable").." using honors to check names", true)
-      fg(defaultcolour)
-      echo(" use honors.\n")
-    end
-  })
+  for _, key in ipairs({"usehonors", "autoclassset", "autocheck"}) do
+    svo.conf[key] = nil
+    svo.config_dict:set(key, nil)
+  end
 
   svo.config.setoption("ndbpaused", {
     type = "boolean",
     onenabled = function () ndb.loadhighlights() svo.echof("Name highlighting <250,0,0>stopped%s.", svo.getDefaultColor()) end,
-    ondisabled = function () ndb.loadhighlights() svo.echof("Name highlighting <0,250,0>resumed%s.", svo.getDefaultColor()) end
-  })
-
-  svo.conf.autoclassset = svo.conf.autoclassset or 10
-  svo.config.setoption("autoclassset", {
-    type = "number",
-    vconfig2string = true,
+    ondisabled = function () ndb.loadhighlights() svo.echof("Name highlighting <0,250,0>resumed%s.", svo.getDefaultColor()) end,
     onshow = function (defaultcolour)
       fg("gold")
       echoLink("NameDB:", "", "svo NameDB", true)
-      fg(defaultcolour) echo(" Capture a persons class after ")
-      fg("a_cyan") echoLink(tostring(svo.conf.autoclassset), "printCmdLine('vconfig autoclassset ')", "Click to set the amount of consecutive attacks a person must do from a particular class before it's recorded in NameDB. This is for anti-illusion purposes, so illusions can't easily make NameDB mess with their known class", true)
-      fg(defaultcolour)
-      echo(" consecutive attacks.\n")
-    end,
-    onset = function ()
-      svo.echof("Will record/change a persons class after %d class-specific attacks from them.", svo.conf.autoclassset)
-    end,
+      fg(defaultcolour) echo(" HTTPS lookups are automatic; name highlighting is ")
+      fg("a_cyan") echoLink(not svo.conf.ndbpaused and "on" or "off", "svo.config.set('ndbpaused', "..(svo.conf.ndbpaused and "false" or "true")..", true)", "Click to "..(svo.conf.ndbpaused and "start" or "stop").." highlighting names", true)
+      fg(defaultcolour) echo(".\n")
+    end
   })
+
 
   svo.config.setoption("politics", {
     type = "custom",

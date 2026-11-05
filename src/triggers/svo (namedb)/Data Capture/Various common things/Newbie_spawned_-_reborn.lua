@@ -1,5 +1,5 @@
-local temp_name_list = { {name = matches[2], xp_rank = -1} }
+local temp_name_list = {{name = matches[2]}}
 
-db:merge_unique(ndb.db.people, temp_name_list)
+ndb.merge_discovery(temp_name_list)
 
 raiseEvent("NameDB got new data")

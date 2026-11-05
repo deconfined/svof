@@ -492,6 +492,8 @@ To get started, take a look at your current customprompt by going to ``vconfig2`
 
 You can also disable it with ``vconfig customprompt off``, and to get it back, do ``vconfig customprompt on``.
 
+Literal text is preserved, including apostrophes, backslashes and actual newline characters. The two-character sequences ``\n`` and ``\t`` are literal text, not Lua escapes; prompts that previously relied on their accidental interpretation need actual newline or tab characters instead. This does not change tags, colours or the Lua expressions supplied when registering custom tag definitions.
+
 What goes inside the *<line>* is how you build your prompt - with tags and colours. Tags start with the ``@`` symbol, colours start with the ``^`` symbol - and to apply a colour to a tag, you use it before the tag. Available tags are:
 
 ==================== ===============
@@ -1553,6 +1555,7 @@ svo me.wielded updated                                                   raised 
 svo gametarget changed            gametarget name                        raised when your in-game target changes, if your in-game custom prompt is tracking it (as set by Svof when adding a @gametarget or a @gametargethp tag)
 svo gametargethp changed          gametarget name, hp                    raised when your in-game targets health changes, if your in-game custom prompt is tracking it (as set by Svof when adding a @gametarget or a @gametargethp tag)
 svo prio changed                  action, balance, newprio, slowcuring   raised when a priority is changed. Action is the thing itself (so an affliction, defence, etc), balance is the balance it is on, newprio is the new priority #, and slowcuring is whenever this happened on the aeon/retardation priority.
+svo priority aff changed          status, affliction, reason             raised when observed temporary PRIOAFF state or its evidence changes; read svo.me.priorityaff. This is separate from stored curing priorities. Affliction is nil unless status is active.
 svo ignore changed                action                                 raised when the ignore list is changed. Use :func:`svo.setignore` when changing svo.ignore, so this event is raised
 svo serverignore changed          action                                 raised when the server ignore list is changed. Use :func:`svo.setserverignore` when changing svo.serverignore, so this event is raised
 svo defup changed                 mode, which, status                    raised when a defence's defup status is changed on a particular defup defences mode
@@ -3055,7 +3058,7 @@ This is the start of a list that details all of the data (variables) available t
   :sorted:
 
   svo.sp_config
-    (table) a general table for the parry system configuration that lists the current parry strategy employed, limb action levels and the desired limb(s) that should be parried. You can use *vp show* as an alias or *svo.sp.show()* as a function to display this data.
+    (table) a general table for the parry system configuration that lists the current parry strategy employed and the desired limb(s) that should be parried. Setup and reload preserve this table's identity. You can use *vp show* as an alias or *svo.sp.show()* as a function to display this data.
 
   svo.sp_config.parry
     (string or function) the name of the current parry strategy being used, or a function if you are using a custom parry strategy. You can set a different parry strategy to use via *vsetup sp*, *vshow → current parry strategy*, *vp parrystrat <strategy>* or *svo.sp.setparry("parry strategy", true)*. If you'd like to setup a custom parry strategy of your own, see `Custom parry strategy`_.
@@ -3065,9 +3068,6 @@ This is the start of a list that details all of the data (variables) available t
 
   svo.sp_config.parry_shouldbe
     (key-value table) the table that contains data on what limb should be current parried. It's key-value as to allow dual-parry - but that's not possible right now, so only one value matters for the weaponry parry. This table is modified by parry strategies - if you'd like to update it, use a your own strat (`Custom parry strategy`_) to set it - otherwise the current strategy will be overwriting your values.
-
-  svo.sp_config.parry_actionlevel
-    Not actually used for anything at the moment - reserved for future.
 
   svo.stats
     (table) stores your character vitals and balance stats. You can check them in your triggers/aliases/scripts by using *svo.stats.<stat>* - for example, *svo.stats.hp* will give your current health as a %.
@@ -3084,6 +3084,9 @@ This is the start of a list that details all of the data (variables) available t
 
   svo.me.locks
     (table) a key-value table that stores the current affliction locks you've got as their name. See :ref:`custom prompts<on-affliction-locks>` for a list of possible ones.
+
+  svo.me.priorityaff
+    (read-only table) observed temporary server PRIOAFF state. ``status`` is ``active``, ``none`` or ``unknown``; ``affliction`` holds the raw game name only while active, including names not yet known to svof. ``reason`` describes the observation or invalidation. Optional ``cleared``, ``mismatch`` and ``previous_affliction`` retain named-clear evidence; ``curingset`` is the observed set when known. A clear for a different affliction does not prove universal absence. An observed set switch, reload or connection boundary invalidates certainty. Outgoing commands, local cures and stored-priority resets do not change this record by inference. The table keeps its identity across reloads; use the ``svo priority aff changed`` event to refresh displays.
 
   svo.me.curelist
     (table) A key-value table that stores your vconfig curemethod prefercustom settings. The forestal cure is the key, and the value is either the same forestal cure or the alchemist cure. You can modify the table directly to adjust your prefercustom settings programmatically.

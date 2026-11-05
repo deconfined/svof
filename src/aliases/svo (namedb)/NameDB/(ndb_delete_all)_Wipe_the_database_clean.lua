@@ -6,6 +6,7 @@ if not ndb.deleteall then
 end
 
 ndb.deleteall = nil
+ndb.cancel_lookups()
 db:delete(ndb.db.people, true)
 
 -- clear highlights

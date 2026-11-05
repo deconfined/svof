@@ -18,6 +18,14 @@ local pipes, install = svo.pipes, svo.install
 
 install.ids = install.ids or {}
 
+-- Requests belong to this loader/class and installation run, not arbitrary AB
+-- replies. installdata keys are the canonical config names; GMCP names need not
+-- match them. Both Info and List settle through the same pending request.
+local skill_requests = {}
+local morph_requested = false
+local request_class
+if svo.installtimer then killTimer(svo.installtimer); svo.installtimer = nil end
+
 -- same name as conf
 -- function to say have/don't have
 local installdata = {
@@ -106,7 +114,7 @@ if not svo.haveskillset('tekura') then
     gmcp = {group = 'weaponry', name = 'parrying'},
   }
 else
-  installdata.parry = {
+  installdata.guarding = {
     gmcp = {group = 'tekura', name = 'guarding'},
   }
 end
@@ -149,28 +157,34 @@ if svo.haveskillset('zeal') then
   }
 end
 
-function svo.installclear(what)
+local function clear_install_id(what)
+  if not install.ids[what] then return false end
+  skill_requests[what] = nil
   if type(install.ids[what]) == 'table' then
-
-    for _, id in pairs(install.ids[what]) do
-      killTrigger(id)
-      install.ids[what][_] = nil
-    end
-    install.ids[what] = nil
-
-  else
-    install.ids[what] = nil
+    for _, id in pairs(install.ids[what]) do killTrigger(id) end
   end
+  install.ids[what] = nil
+  return true
+end
+
+-- A class reload retires old requests without changing that class's choices.
+for option in pairs(install.ids) do clear_install_id(option) end
+install.ids = {}
+
+function svo.installclear(what)
+  if not clear_install_id(what) then return end
 
   if svo.installtimer then killTimer(svo.installtimer) end
-  tempTimer(5+getNetworkLatency(), function ()
+  local ids, class = install.ids, request_class
+  svo.installtimer = tempTimer(5+getNetworkLatency(), function ()
+    if install.ids ~= ids or svo.me.class ~= class then return end
     if next(install.ids) then
       for thing, _ in pairs(install.ids) do
-        if svo.config_dict[thing] and svo.config_dict[thing].type == 'boolean' then
+        if conf[thing] == nil and svo.config_dict[thing] and svo.config_dict[thing].type == 'boolean' then
           svo.config.set(thing, false, true)
         end
 
-        svo.installclear(thing)
+        clear_install_id(thing)
       end
     end
 
@@ -218,18 +232,24 @@ function svo.installstart(fresh)
   end
 
   install.ids = {}
+  skill_requests = {}
+  request_class = svo.me.class
+  morph_requested = false
   local ids = install.ids
 
     for skill, skilldata in pairs(installdata) do
-      if skilldata.gmcp then
-        sendGMCP("Char.Skills.Get "..yajl.to_string(skilldata.gmcp))
+      if skilldata.gmcp and svo.config_dict[skill] and svo.config_dict[skill].type == 'boolean' then
+        skill_requests[skill] = skilldata.gmcp
         ids[skill] = true
+        sendGMCP("Char.Skills.Get "..yajl.to_string(skilldata.gmcp))
       end
     end
 
     sendGMCP("Char.Skills.Get "..yajl.to_string{group = 'survival'})
     sendGMCP("Char.Items.Inv")
 if svo.haveskillset('metamorphosis') then
+    morph_requested = true
+    ids.morphskill = true
     sendGMCP("Char.Skills.Get "..yajl.to_string{group = 'metamorphosis'})
 end
     signals.gmcpcharskillsinfo:unblock(install.checkskillgmcp)
@@ -269,7 +289,12 @@ end
 
   -- defaults/reset
   for name, tbl in svo.config_dict:iter() do
-    if tbl.installstart then tbl.installstart(); raiseEvent("svo config changed", name) end
+    -- Re-detection is not permission to turn a user's disabled cure back on.
+    -- Only an explicitly fresh installation resets discovered preferences.
+    if tbl.installstart and (fresh or not installdata[name] or not installdata[name].gmcp or conf[name] == nil) then
+      tbl.installstart()
+      raiseEvent("svo config changed", name)
+    end
   end
   pipes.elm.id, pipes.skullcap.id, pipes.valerian.id = 0,0,0
 
@@ -342,24 +367,30 @@ svo.install.check_install_step = function()
   end)
 end
 
+local function settle_skill(option, learned)
+  if not install.ids[option] or not skill_requests[option] or svo.me.class ~= request_class then return end
+  if conf[option] == nil then
+    conf[option] = learned
+    if learned then
+      svo.echof("Have %s, so <0,250,0>will%s be using it whenever possible.", option, svo.getDefaultColor())
+    else
+      svo.echof("Don't have %s, so <250,0,0>won't%s be using it whenever possible.", option, svo.getDefaultColor())
+    end
+    raiseEvent("svo config changed", option)
+  end
+  svo.installclear(option)
+end
+
 function svo.install.checkskillgmcp()
   local t = _G.gmcp.Char.Skills.Info
-  if not t then return end
-
-  if t.skill == 'clotting' then t.skill = 'clot' end
-  if t.skill == 'parrying' then t.skill = 'parry' end
-
-  if conf[t.skill] == nil and (t.info == "" or t.info:find("You have not yet learned this ability")) then
-    conf[t.skill] = false
-    svo.echof("Don't have %s, so <250,0,0>won't%s be using it whenever possible.", t.skill, svo.getDefaultColor())
-    raiseEvent("svo config changed", t.skill)
-  elseif conf[t.skill] == nil then
-    conf[t.skill] = true
-    svo.echof("Have %s, so <0,250,0>will%s be using it whenever possible.", t.skill, svo.getDefaultColor())
-    raiseEvent("svo config changed", t.skill)
+  if type(t) ~= 'table' or type(t.group) ~= 'string' or type(t.skill) ~= 'string' or type(t.info) ~= 'string' then return end
+  local group, skill = t.group:lower(), t.skill:lower()
+  for option, request in pairs(skill_requests) do
+    if request.group == group and request.name == skill then
+      settle_skill(option, t.info ~= "" and not t.info:find("You have not yet learned this ability", 1, true))
+      return
+    end
   end
-
-  svo.installclear(t.skill)
 end
 signals.gmcpcharskillsinfo:connect(install.checkskillgmcp, 'checkskillgmcp')
 signals.gmcpcharskillsinfo:block(install.checkskillgmcp)
@@ -384,26 +415,33 @@ signals.gmcpcharitemslist:block(install.checkinvgmcp)
 
 function svo.install.checkskilllist()
   local t = _G.gmcp.Char.Skills.List
-  if t.group == 'survival' then
-    for _, k in ipairs{{'focus', 'focusing'}, {'restore', 'restoration'}, {'insomnia', 'insomnia'}, {'clot', 'clotting'}, {'breath', 'breathing'}, {'efficiency', 'efficiency'}} do
-      if svo.contains(t.list, k[2]:title()) then
-        svo.config.set(k[1], true, true)
-        svo.installclear(k[1])
+  if type(t) ~= 'table' or type(t.group) ~= 'string' or type(t.list) ~= 'table' or svo.me.class ~= request_class then return end
+  local group, learned = t.group:lower(), {}
+  for _, skill in ipairs(t.list) do
+    if type(skill) ~= 'string' then return end
+    learned[skill:lower()] = true
+  end
+  -- Char.Skills.List is the group's available AB abilities. Resolve only
+  -- requests we issued, including unavailable abilities omitted from the list.
+  local resolved = {}
+  for option, request in pairs(skill_requests) do
+    if request.group == group then resolved[#resolved + 1] = option end
+  end
+  for _, option in ipairs(resolved) do
+    settle_skill(option, learned[skill_requests[option].name] == true)
+  end
+
+  if svo.haveskillset('metamorphosis') and group == 'metamorphosis' and morph_requested and install.ids.morphskill then
+    morph_requested = false
+    if conf.morphskill == nil then
+      for _, k in ipairs{'truemorph', 'hydra', 'wyvern', 'affinity', 'icewyrm', 'gorilla', 'eagle', 'jaguar', 'wolverine', 'transmorph', 'elephant', 'nightingale', 'bonding', 'bear', 'basilisk', 'sloth', 'gopher', 'condor', 'hyena', 'owl', 'cheetah', 'jackdaw', 'turtle', 'wolf', 'wildcat', 'powers', 'squirrel'} do
+        if learned[k] then
+          svo.config.set('morphskill', k, true)
+          break
+        end
       end
     end
-  end
-
-if svo.haveskillset('metamorphosis') then
-  if t.group == 'metamorphosis' then
-    for _, k in ipairs{'truemorph', 'hydra', 'wyvern', 'affinity', 'icewyrm', 'gorilla', 'eagle', 'jaguar', 'wolverine', 'transmorph', 'elephant', 'nightingale', 'bonding', 'bear', 'basilisk', 'sloth', 'gopher', 'condor', 'hyena', 'owl', 'cheetah', 'jackdaw', 'turtle', 'wolf', 'wildcat', 'powers', 'squirrel'} do
-    if svo.contains(t.list, k:title()) then
-      svo.config.set('morphskill', k, true)
-      break
-    end
-  end
-
-  svo.installclear('morphskill')
-end
+    svo.installclear('morphskill')
   end
 end
 signals.gmcpcharskillslist:connect(install.checkskilllist, 'checkskilllist')

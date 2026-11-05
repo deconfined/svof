@@ -1741,7 +1741,7 @@ if svo.haveskillset('metamorphosis') then
       signals.morphskillchanged:emit()
       svo.echof("Given your morph skill, these are all defences you can put up: %s.", svo.concatand(svo.keystolist(sk.morphsforskill)) ~= "" and svo.concatand(svo.keystolist(sk.morphsforskill)) or "(... none, actually. Nevermind!)")
     end,
-    installstart = function () svo.sp_config.morphskill = nil end,
+    installstart = function () conf.morphskill = nil end,
     installcheck = function () svo.echof("What is the highest available morph that you can go into?") end
   })
 end

@@ -317,6 +317,14 @@ function world.new(opts)
   local function link(text, code) w.links[#w.links + 1] = tostring(text) .. " " .. tostring(code) end
 
   local mudlet = {
+    loadstring = function(code, name)
+      if setfenv then
+        local chunk, err = loadstring(code, name)
+        if chunk then setfenv(chunk, env) end
+        return chunk, err
+      end
+      return load(code, name, "t", env)
+    end,
     tempTimer = function(t, f)
       timerseq = timerseq + 1
       w.timers[timerseq] = { at = w.now + t, f = f, seq = timerseq }
@@ -354,7 +362,7 @@ function world.new(opts)
     deleteLine = noop, selectString = function() return -1 end, replace = noop, creplace = noop,
     setFgColor = noop, setBgColor = noop, setUnderline = noop, setBold = noop, setItalics = noop,
     moveCursor = noop, moveCursorEnd = noop, selectCurrentLine = noop, deselect = noop,
-    fg = noop, bg = noop, resetFormat = noop, copy = noop, paste = noop, wrapLine = noop,
+    fg = noop, bg = noop, resetFormat = noop, copy = noop, paste = noop, appendBuffer = noop, wrapLine = noop,
     getCurrentLine = function() return env.line end, getLineNumber = function() return 1 end,
     getLines = function() return {} end, getLineCount = function() return 1 end,
     getLastLineNumber = function() return 1 end, getTimestamp = function() return "" end,
@@ -363,7 +371,7 @@ function world.new(opts)
       for _, c in ipairs({...}) do if type(c) == "string" then w.sent[#w.sent + 1] = c end end
     end,
     sendGMCP = noop, sendSocket = noop, expandAlias = noop, denyCurrentSend = noop,
-    printCmdLine = noop, clearCmdLine = noop,
+    printCmdLine = noop, clearCmdLine = noop, appendCmdLine = noop,
     enableTrigger = noop, disableTrigger = noop, enableAlias = noop, disableAlias = noop,
     enableTimer = noop, disableTimer = noop, enableKey = noop, disableKey = noop,
     exists = function() return 1 end, isActive = function() return 1 end, setTriggerStayOpen = noop,

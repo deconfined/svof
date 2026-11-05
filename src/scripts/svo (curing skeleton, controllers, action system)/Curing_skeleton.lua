@@ -16,10 +16,11 @@ local deepcopy, conf, sk, me, defs, defc = svo.deepcopy, svo.conf, svo.sk, svo.m
 local defences, stats, cnrl, rift = svo.defences, svo.stats, svo.cnrl, svo.rift
 local bals, pipes, watch = svo.bals, svo.pipes, svo.watch
 
-sk.affqueueslow = {}
-sk.defqueueslow = {}
-sk.queuecount = sk.queuecount or 0
-sk.priolength = sk.priolength or {affqueue = 0, affqueueslow = 0, defqueue = 0, defqueueslow = 0}
+-- Reloads invalidate the previous writer before replacing any of its callbacks.
+if sk.cancelprioritydelivery then sk.cancelprioritydelivery() end
+if sk.cancelpriorityupdates then sk.cancelpriorityupdates() end
+if sk.prioritydisconnecthandler then killAnonymousEventHandler(sk.prioritydisconnecthandler) end
+if sk.priorityconnecthandler then killAnonymousEventHandler(sk.priorityconnecthandler) end
 
 -- misc functions
 function svo.errorf(...)
@@ -2426,120 +2427,171 @@ function svo.sendcuring(what)
   sk.sendqueuecmd(what)
 end
 
+-- These are Svof's two owned sets, not whichever set the player last selected.
+-- With no argument this reports the intended native active mode *now*.
+function sk.nativecuringset(slow)
+  if slow == nil then slow = sys.sync end
+  return slow and "slowcuring" or "normal"
+end
+
+function sk.cancelprioritydelivery()
+  local owner = sk.prioritywriter
+  if owner and owner.timer then killTimer(owner.timer) end
+  -- The producer advances these when it enqueues, not when the wire drains.
+  -- Discarding that work therefore invalidates the native rank snapshot too.
+  -- Keep global health/mana/focus settings on their existing buffered path.
+  local special = sk.priochangecache and sk.priochangecache.special
+  sk.priochangecache = {special = special or {}}
+  sk.priosbeforechange, sk.priorityneedsync = nil, true
+  sk.prioritywriter = {pending = {}, head = 1, count = 0, window = getEpoch()}
+end
+sk.cancelprioritydelivery()
+
+local disconnecthandler
+disconnecthandler = registerAnonymousEventHandler("sysDisconnectionEvent", function()
+  if sk.prioritydisconnecthandler ~= disconnecthandler then return end
+  sk.prioritydisconnected = true
+  sk.cancelprioritydelivery()
+  if sk.cancelpriorityupdates then sk.cancelpriorityupdates() end
+end)
+sk.prioritydisconnecthandler = disconnecthandler
+
+-- Only Mudlet's connection boundary can reopen delivery. setupserverside is
+-- also called by configuration changes and cannot establish that we are online.
+-- Setup's connection handler sets logging_in first; the native welcome trigger
+-- later emits changecuring to resume a fresh snapshot after login completes.
+local connecthandler
+connecthandler = registerAnonymousEventHandler("sysConnectionEvent", function()
+  if sk.priorityconnecthandler ~= connecthandler then return end
+  sk.prioritydisconnected = nil
+  sk.cancelprioritydelivery()
+  if sk.cancelpriorityupdates then sk.cancelpriorityupdates() end
+end)
+sk.priorityconnecthandler = connecthandler
+
+local function detachprioritybatch(owner)
+  if not owner.batch then return end
+  local batch = owner.batch
+  owner.batch = nil
+  owner.pending[#owner.pending+1] = {
+    command = batch.prefix..table.concat(batch.entries),
+    set = batch.set
+  }
+end
+
+-- A native snapshot can enumerate afflictions and defences in any order.
+-- Group only its independent set/kind streams, retaining each stream's rank
+-- order. Closing the snapshot seals every chunk before any newer producer.
+function sk.beginprioritysnapshot()
+  local owner = sk.prioritywriter
+  detachprioritybatch(owner)
+  owner.snapshot = {batches = {}, buckets = {}}
+end
+
+function sk.endprioritysnapshot()
+  local owner = sk.prioritywriter
+  local snapshot = owner.snapshot
+  if not snapshot then return end
+  owner.snapshot = nil
+  for _, batch in ipairs(snapshot.batches) do
+    owner.pending[#owner.pending+1] = {
+      command = batch.prefix..table.concat(batch.entries),
+      set = batch.set
+    }
+  end
+end
+
+local function scheduleprioritydrain(owner, delay)
+  if owner.timer then return end
+  local ticket = {}
+  owner.ticket = ticket
+  owner.timer = tempTimer(delay, function()
+    -- A killed/already-delivered callback must not touch a replacement timer,
+    -- a newer batch, or a writer installed by reload/reset/disconnect.
+    if sk.prioritywriter ~= owner or owner.ticket ~= ticket then return end
+    owner.timer, owner.ticket = nil, nil
+    sk.dosendprios()
+  end)
+end
+
 function sk.dosendprios()
-    local sys = svo.sys
-    local function resetpriolength()
-      sk.priolength = {affqueue = 0, affqueueslow = 0, defqueue = 0, defqueueslow = 0}
+  local owner = sk.prioritywriter
+  if owner.timer then killTimer(owner.timer) end
+  owner.timer, owner.ticket = nil, nil
+  if not conf.serverside or sk.prioritydisconnected or svo.logging_in then
+    sk.cancelprioritydelivery()
+    return
+  end
+  detachprioritybatch(owner)
+  sk.endprioritysnapshot()
+  if not owner.pending[owner.head] then return end
+
+  -- One FIFO and one rate window: later public drains and overflow chunks
+  -- cannot overtake an older throttled write.
+  while owner.pending[owner.head] do
+    local now = getEpoch()
+    if now >= owner.window then owner.count = 0; owner.window = now + 1 + getNetworkLatency() end
+    if owner.count >= 5 then
+      scheduleprioritydrain(owner, math.max(0, owner.window - now))
+      return
     end
-    local function sendstuff(what, queue)
-      if queue == "normal" then
-        send(what,false)
-      elseif queue == "slow" then
-        if sys.sync == true then
-          sendAll("curingset switch slowcuring", what, false)
-        else
-          sendAll("curingset switch slowcuring", what, "curingset switch normal", false)
-        end
-      end
-    end
-    
-    if sk.sendpriotimer then killTimer( sk.sendpriotimer ) end
-  
-    if #sk.affqueue > 0 then
-        local what = "curing priority"..table.concat(sk.affqueue)
-        if sk.queuecount > 4 then
-          tempTimer(1+getNetworkLatency(),function()
-            sendstuff(what,"normal")
-            sk.affqueue = {}
-            sk.queuecount = 0
-          end)
-        else
-          sendstuff(what,"normal")
-          sk.affqueue = {}
-          sk.queuecount = sk.queuecount + 1
-        end
-    end
-    if #sk.defqueue > 0 then
-        local what = "curing priority defence"..table.concat(sk.defqueue)
-        if sk.queuecount > 4 then
-          tempTimer(1+getNetworkLatency(),function()
-          sendstuff(what,"normal")
-          sk.defqueue = {}
-          sk.queuecount = 0
-          end)
-        else
-          sendstuff(what,"normal")
-          sk.defqueue = {}
-          sk.queuecount = sk.queuecount + 1
-        end
-    end
-    if #sk.affqueueslow > 0 then
-        local what = "curing priority"..table.concat(sk.affqueueslow)
-        if sk.queuecount > 4 then
-          tempTimer(1+getNetworkLatency(),function()
-          sendstuff(what,"slow")
-          sk.affqueueslow = {}
-          sk.queuecount = 0
-          end)
-        else
-          sendstuff(what,"slow")
-          sk.affqueueslow = {}
-          sk.queuecount = sk.queuecount + 1
-        end
-    end
-    if #sk.defqueueslow > 0 then
-        local what = "curing priority defence"..table.concat(sk.defqueueslow)
-        if sk.queuecount > 4 then
-          tempTimer(1+getNetworkLatency(),function()
-          sendstuff(what,"slow")
-          sk.defqueueslow = {}
-          sk.queuecount = 0
-          end)
-        else
-          sendstuff(what,"slow")
-          sk.defqueueslow = {}
-          sk.queuecount = sk.queuecount + 1
-        end
-    end
-  tempTimer(1,function() sk.queuecount = 0 end)     
-  sk.sendpriotimer = nil
-  resetpriolength()
+
+    local batch = owner.pending[owner.head]
+    -- Preserve the native buffered command order, including cures already
+    -- waiting for their zero-timer flush, before touching the selected set.
+    sk.dosendqueue()
+    local active = sk.nativecuringset()
+    sendAll("curingset switch "..batch.set, batch.command, false)
+    if batch.set ~= active then send("curingset switch "..active, false) end
+    owner.head = owner.head + 1
+    owner.count = owner.count + 1
+  end
+  owner.pending, owner.head = {}, 1
 end
 
 function svo.sendcuringprio(prio, kind, slow)
-  local sys = svo.sys
-  prio = " "..prio
-  local what, tab, cmd
-  if kind == 'affliction' then
-    tab = "affqueue"
-    cmd = "curing priority"
-  elseif kind == 'defence' then
-    tab = "defqueue"
-    cmd = "curing priority defence"
+  if not conf.serverside or sk.prioritydisconnected then return end
+  local prefix
+  if kind == 'affliction' then prefix = "curing priority"
+  elseif kind == 'defence' then prefix = "curing priority defence"
+  else return end
+
+  local owner, set = sk.prioritywriter, sk.nativecuringset(slow == true)
+  local entry = " "..prio
+  local reset = prio:lower() == "reset" or prio:lower() == "list reset"
+  -- Whole-list resets are barriers, even inside a native snapshot.
+  local snapshot = owner.snapshot
+  if reset then
+    detachprioritybatch(owner)
+    sk.endprioritysnapshot()
+    owner.pending[#owner.pending+1] = {command = prefix..entry, set = set}
+    if snapshot then sk.beginprioritysnapshot() end
   else
-    return
-  end
-  if slow == true then tab = tab.."slow" end
-  if (sk.priolength[tab] + #cmd + #prio) >= sk.achaea_command_max_length then
-    what = cmd..table.concat(sk[tab])
-    if slow == true then
-      if sys.sync then
-        sendAll( "curingset switch slowcuring", what, false )
-      else
-        sendAll( "curingset switch slowcuring", what, "curingset switch normal", false )
+    local batch
+    if snapshot then
+      local key = set..":"..kind
+      batch = snapshot.buckets[key]
+      if not batch or batch.length + #entry >= sk.achaea_command_max_length then
+        batch = {prefix = prefix, set = set, entries = {}, length = #prefix}
+        snapshot.batches[#snapshot.batches+1] = batch
+        snapshot.buckets[key] = batch
       end
     else
-      send( what )
+      if owner.batch and (owner.batch.set ~= set or owner.batch.prefix ~= prefix
+          or owner.batch.length + #entry >= sk.achaea_command_max_length) then
+        detachprioritybatch(owner)
+      end
+      if not owner.batch then owner.batch = {prefix = prefix, set = set, entries = {}, length = #prefix} end
+      batch = owner.batch
     end
-    sk[tab] = {}
+    -- Only adjacent ranks in the same stream can be dropped. In particular,
+    -- asthma 3, asthma 9, asthma 3 must retain all three ordered updates.
+    if batch.entries[#batch.entries] ~= entry then
+      batch.entries[#batch.entries+1] = entry
+      batch.length = batch.length + #entry
+    end
   end
-  if not table.contains(sk[tab], prio) then 
-    sk[tab][#sk[tab]+1] = prio
-    sk.priolength[tab] = sk.priolength[tab] + #prio
-  end
-  if not sk.sendpriotimer then
-    sk.sendpriotimer = tempTimer(0, sk.dosendprios)
-  end
+  scheduleprioritydrain(owner, 0)
 end
 
 -- public function
@@ -2674,6 +2726,10 @@ signals.gmcpcharitemsremove:connect(function ()
     sk.removed_something = nil
   end)
 end, 'update sk.removed_something')
+
+-- The serverside loader may run before or after this one on a live reload.
+-- Its timer resolves the current producer/writer only after both return.
+if sk.resumepriorityupdates then sk.resumepriorityupdates() end
 
 end -- end of svo skeleton loader
 

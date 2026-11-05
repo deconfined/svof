@@ -1,0 +1,9 @@
+{
+  "source": "https://raw.githubusercontent.com/Mudlet/Mudlet/Mudlet-4.19.1/src/mudlet-lua/lua/DB.lua",
+  "version": "Mudlet-4.19.1",
+  "git_blob": "2f49167fa2a1d71b588a54176f840bbc388cd889",
+  "sha256": "938172f89eecfa41d1a97e84dd04d68d929e2e716d2be8ca7bc49331bd3365bd",
+  "license": "GPL-2.0",
+  "scope": "Unmodified test-only Mudlet database implementation; never packaged into svof.",
+  "luasql": "luasql-sqlite3 2.6.0-2"
+}

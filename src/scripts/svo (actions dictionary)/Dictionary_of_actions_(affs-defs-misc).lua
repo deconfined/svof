@@ -9476,8 +9476,23 @@ if not next(svo.dict) then
     -- random actions that should be protected by AI
     givewarning = {
       happened = {
+        ontimeout = function()
+          cnrl.clearpendingwarnings()
+        end,
         oncompleted = function (tbl)
-          if tbl and tbl.initialmsg then
+          if tbl and tbl.warningepoch then
+            if not cnrl.warningbatchvalid(tbl) then return end
+            local prefix
+            for _, warning in ipairs(tbl.warnings) do
+              if warning.initialmsg then
+                echo"\n\n"
+                svo.echof("Careful: %s", warning.initialmsg)
+                echo"\n"
+              end
+              if warning.prefixwarning then prefix = warning end
+            end
+            tbl = prefix
+          elseif tbl and tbl.initialmsg then
             echo"\n\n"
             svo.echof("Careful: %s", tbl.initialmsg)
             echo"\n"

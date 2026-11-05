@@ -32,5 +32,59 @@
         "type": "regex"
       }
     ]
+  },
+  {
+    "name": "Rising winds",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^The wind suddenly picks up, threatening to cast you to the ground with its strength\\. Clouds roll in and begin to madly boil as a roaring like distant thunder begins to build, growing ever louder\\.$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Upward launch",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "points an imperious finger at you, a wall of air manifesting beneath you and sending you streaking upwards.",
+        "type": "substring"
+      }
+    ]
+  },
+  {
+    "name": "Resounding clap",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^(\\w+) brings \\w+ hands together in a single, resounding clap\\.",
+        "type": "regex"
+      }
+    ]
   }
 ]

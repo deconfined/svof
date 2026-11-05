@@ -6,12 +6,6 @@
     "regex": "^whois (\\w+)$"
   },
   {
-    "name": "Honors a person",
-    "isActive": "yes",
-    "isFolder": "no",
-    "regex": "^honou?rs? (\\w+)$"
-  },
-  {
     "name": "(ndb set person category value) Adjust person data",
     "isActive": "yes",
     "isFolder": "no",
@@ -60,16 +54,10 @@
     "regex": "^ndb stats$"
   },
   {
-    "name": "(ndb cancel) Cancel honors'ing people",
+    "name": "(ndb cancel) Cancel HTTP lookups",
     "isActive": "yes",
     "isFolder": "no",
     "regex": "^ndb cancel$"
-  },
-  {
-    "name": "(ndb honorsnew) Honors backlog of new people",
-    "isActive": "yes",
-    "isFolder": "no",
-    "regex": "^ndb honorsnew$"
   },
   {
     "name": "(ndb export) export DB",
@@ -132,27 +120,21 @@
     "regex": "^ndb( long)?$"
   },
   {
-    "name": "(qwm) Show marks",
+    "name": "HTTP character lookup",
     "isActive": "yes",
     "isFolder": "no",
-    "regex": "^qwm$"
+    "regex": "^ndb lookup ([A-Za-z]+)$"
   },
   {
-    "name": "(qwic) Show Infamous (quick)",
+    "name": "HTTP online list",
     "isActive": "yes",
     "isFolder": "no",
-    "regex": "^qwic$"
+    "regex": "^ndb online$"
   },
   {
-    "name": "(qwi) Show Infamous (update first)",
+    "name": "HTTP unknown refresh",
     "isActive": "yes",
     "isFolder": "no",
-    "regex": "^qwi$"
-  },
-  {
-    "name": "(ndb infamous) Shows known infamous people in the database",
-    "isActive": "yes",
-    "isFolder": "no",
-    "regex": "^ndb infamous$"
+    "regex": "^ndb refresh$"
   }
 ]

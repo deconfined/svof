@@ -9,6 +9,7 @@ end
 
 
 ndb.deleteunranked = nil
+ndb.cancel_lookups()
 db:delete(ndb.db.people, db:eq(ndb.db.people.xp_rank, -2))
 
 -- clear highlights

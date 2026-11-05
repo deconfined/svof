@@ -728,7 +728,8 @@ function cp.generatetable(customprompt)
 
   local function add_buffer()
     if buffer ~= "" then
-      t[#t+1] = "'" .. buffer .. "'"
+      -- Only literal text is quoted; registered tag definitions remain expressions.
+      t[#t+1] = string.format("%q", buffer)
       buffer = ""
     end
   end

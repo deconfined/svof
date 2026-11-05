@@ -201,6 +201,7 @@ function svo.undo(what, echoback)
       action = action.what
     end
 
+    table.remove(me.doqueue, 1)
     if echoback then svo.echof("Removed \"%s\" from the do queue.", action) end
   end
   raiseEvent("svo do changed")

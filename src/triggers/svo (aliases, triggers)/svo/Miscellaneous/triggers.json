@@ -501,5 +501,77 @@
         "type": "regex"
       }
     ]
+  },
+  {
+    "name": "Endbringer start",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^(\\w+) begins to regale (\\w+) with a tale of a murder most foul\\. Of Thoth's own death at the hands of Slith, Prince of the Underworld\\. Of how the half-Aldar grew gluttonous of death, the power of utter massacre and slaughter piercing the Soulrealms\\. And of Slith's passage through the desolate plains, there to the Throne of Death to confront Death's God\\.",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Endbringer continuation",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^(\\w+) recounts to (\\w+) Slith's battle with Thoth, the gauntlet-clad claiming of the scythe that was the Endbringer's office\\. Of the battle betwixt ambition and inevitability, until at last the clatter of Thoth's white mask echoed across Creation and Prince dethroned God with His own Ayar-given blade\\.",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Criers bell start",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^(\\w+) begins slowly swinging \\w+ crier's bell back and forth, each swing punctuated by a loud ring\\.$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Criers bell direct",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "multilineDelta": "0",
+    "filter": "no",
+    "fireLength": "0",
+    "highlight": "no",
+    "highlightFG": "#ff0000",
+    "highlightBG": "#ffff00",
+    "patterns": [
+      {
+        "pattern": "^(\\w+) begins swinging a crier's bell faster and faster, eliciting a great clanging from its depths\\. \"HEAR YE, HEAR YE!\", \\w+ intones, drawing upon you with obvious menace\\.$",
+        "type": "regex"
+      }
+    ]
   }
 ]

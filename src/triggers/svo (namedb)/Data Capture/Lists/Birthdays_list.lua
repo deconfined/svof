@@ -10,7 +10,7 @@ svo.prompttrigger("namedb capture birtdhdays", function()
 		}
 	end
 
-	db:merge_unique(ndb.db.people, temp_name_list)
+	ndb.merge_discovery(temp_name_list)
 
 	raiseEvent("NameDB got new data")
 	bdayTable = nil

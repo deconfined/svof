@@ -4,376 +4,395 @@
 -- You should have received a copy of the license along with this
 -- work. If not, see <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
 
-svo.loader.limbcounter = function()
-local sk = svo.sk
+-- Tracks the limb damage you deal, from the percentage the game prints with each hit.
+-- A limb breaks at 100 and damage keeps adding up past that. Its level says what it takes
+-- to heal, one salve to a level:
+--   1: broken, with no damage behind it. Mending cures it.
+--   2: damaged, from 100. Restoration takes the damage away, which leaves level 1.
+--   3: mangled, from 200. Restoration takes it to level 2.
+-- Head and torso have no bones to mend, so restoration heals them outright from level 2.
+-- A limb also clears after svo.lc_forget_after seconds without a hit.
 
-svo.lc_list = {}
-svo.lc_echo = svo.lc_echo or {}
-svo.lc_priestdamage = svo.lc_priestdamage or false
-svo.lc_shikudodamage = svo.lc_shikudodamage or "none"
-svo.lc_limbreset = svo.lc_limbreset or false
-svo.lc_shaping = svo.lc_shaping or 0
-svo.lc_shikudoskill = { 
-	lowest = lowest or 0,
-	middle = middle or 0,
-	highest = highest or 0
+svo.loader.limbcounter = function()
+local limbs = {'head', 'torso', 'rightarm', 'leftarm', 'rightleg', 'leftleg'}
+local short = {h = 'head', t = 'torso', rl = 'rightleg', ll = 'leftleg', ra = 'rightarm', la = 'leftarm',
+  ['left arm'] = 'leftarm', ['right arm'] = 'rightarm', ['left leg'] = 'leftleg', ['right leg'] = 'rightleg'}
+local limb_area = {head = 'head', torso = 'torso', leftarm = 'arms', rightarm = 'arms',
+  leftleg = 'legs', rightleg = 'legs'}
+-- what a salve line can name, in the order a cure takes the limbs
+local salved = {
+  head = {'head'}, torso = {'torso'}, body = {'torso'},
+  arms = {'leftarm', 'rightarm'}, legs = {'leftleg', 'rightleg'},
 }
 
-local limbs = {'head', 'torso', 'rightarm', 'leftarm', 'rightleg', 'leftleg'}
-local hittable = {}
+-- what mending can reach
+local bones = {arms = salved.arms, legs = salved.legs}
+
+-- what DEVASTATE strikes
+local devastated = {arms = {'leftarm', 'rightarm'}, legs = {'leftleg', 'rightleg'}}
+
+-- Keep ownership across loader/class changes; existing timers retain their deadlines.
+-- The first upgrade from the old closure-local tracker requires a client restart: those
+-- inaccessible timers cannot be safely recovered or cancelled.
+svo._lc_runtime = svo._lc_runtime or {pending = {}, forget = {}, cures = {}, lastdamage = {}}
+local runtime = svo._lc_runtime
+local forget, cures, lastdamage = runtime.forget, runtime.cures, runtime.lastdamage
+
+svo.lc_percent = true
+svo.lc_list = svo.lc_list or {}
+svo.lc_levels = svo.lc_levels or {}
 svo.lc_lasthit = svo.lc_lasthit or ""
-svo.lc_break_at = svo.lc_break_at or 10
-svo.lc_prep_at = function () local prep if svo.lc_break_at then prep = svo.lc_break_at - 1 return prep end end
-svo.lc_myclass = svo.lc_myclass or ""
-svo.lc_classlist =
-  {
-    "Magi",
-    "Paladin",
-    "Infernal",
-    "Runewarden",
-    "Monk",
-    "Priest",
-    "Dragon",
-    "Druid",
-		"Blademaster",
-    "Sentinel",
-    "Sylvan",
-    "earth Elemental Lord",
-    "Unnamable",
-		"None",
-  }
-if table.contains(svo.lc_classlist, svo.me.class) or svo.defc["dragonform"] == true then
-		disableTrigger("svo Meta limbcounter")
-    disableTrigger("svo Sylvan limbcounter")
-		disableTrigger("svo Monk limbcounter")
-		disableTrigger("svo Burn limbcounter")
-		disableTrigger("svo Priest limbcounter")
-		disableTrigger("svo Magi limbcounter")
-		disableTrigger("svo earth Elemental Lord limbcounter")
-		disableTrigger("svo Dragon limbcounter")
-		disableTrigger("svo Knight limbcounter")
-  if svo.me.class == "Paladin" or svo.me.class == "Runewarden" or svo.me.class == "Infernal" or svo.me.class == "Unnamable" then
-    enableTrigger("svo Knight limbcounter")
-		svo.lc_myclass = svo.me.class
-    svo.echof("Loaded svo limbcounter, %s %s.", svo.me.class, tostring(svo.version))
-  elseif svo.me.class == "Druid" or svo.me.class == "Sentinel" then
-    enableTrigger("svo Meta limbcounter")
-		svo.lc_myclass = svo.me.class
-    svo.echof("Loaded svo limbcounter, %s %s.", svo.me.class, tostring(svo.version))
-  elseif svo.defc["dragonform"] == true then
-		enableTrigger("svo Dragon limbcounter")
-		svo.lc_myclass = svo.me.class
-    svo.echof("Loaded svo limbcounter, %s %s.", "Dragon", tostring(svo.version))
-  elseif svo.me.class == "Monk" then
-    if svo.me.path == "tekura" then
-      enableTrigger("svo Monk limbcounter")
-      enableTrigger("Tekura")
-      disableTrigger("Shikudo")
-      svo.config.setoption('legdamage', {
-        type = "number",
-        min = 1,
-        max = 50,
-        vconfig2string = true,
-        onshow = function (defaultcolour)
-          fg("gold")
-          echoLink("Limbcounter:", "", "svo Limbcounter", true)
-          fg(defaultcolour) echo(" Leg damage set to ")
-          fg("a_cyan") echoLink(tostring(svo.conf.legdamage), "printCmdLine('vconfig legdamage ')", "Click to set leg damage for Tekura hits", true)
-          fg(defaultcolour)
-          echo(" \n")
-        end,
-        onset = function ()
-          svo.echof("Changing Leg damage for Tekura hits to %d.", svo.conf.legdamage)
-        end,
-      })
-      svo.config.setoption('armdamage', {
-        type = "number",
-        min = 1,
-        max = 50,
-        vconfig2string = true,
-        onshow = function (defaultcolour)
-          fg("gold")
-          echoLink("Limbcounter:", "", "svo Limbcounter", true)
-          fg(defaultcolour) echo(" Arm damage set to ")
-          fg("a_cyan") echoLink(tostring(svo.conf.armdamage), "printCmdLine('vconfig armdamage ')", "Click to set arm damage for Tekura hits", true)
-          fg(defaultcolour)
-          echo(" \n")
-        end,
-        onset = function ()
-          svo.echof("Changing Arm damage for Tekura hits to %d.", svo.conf.armdamage)
-        end,
-      })
-      svo.echof("Loaded svo limbcounter, %s %s.", "Monk Tekura", tostring(svo.version))
-    elseif svo.me.path == "Shikudo" then
-      enableTrigger("svo Monk limbcounter")
-      enableTrigger("Shikudo")
-      disablTrigger("Tekura")
-      svo.echof("Loaded svo limbcounter, %s %s.", "Monk Shikudo", tostring(svo.version))
-    end    
-	elseif table.contains(svo.lc_classlist, svo.me.class) then
-		svo.lc_myclass = svo.me.class
-    enableTrigger("svo " .. svo.me.class .. " limbcounter")
-    svo.echof("Loaded svo limbcounter, %s %s.", svo.me.class, tostring(svo.version))
+svo.lc_break_at = 100
+svo.lc_forget_after = svo.lc_forget_after or 180
+-- Restoration lands at 4 seconds, as its salve balance comes back, so the person's next salve
+-- can reach us at the same moment. This stays ahead of that line.
+svo.lc_cure_delay = svo.lc_cure_delay or 3.7
+
+local levels = svo.lc_levels
+
+local function player_name(who)
+  if type(who) ~= "string" then return end
+  who = who:match("^%s*([%a]+)%s*$")
+  if not who then return end
+  who = who:lower()
+  if who == "none" or who == "dude" then return end
+  return who:sub(1, 1):upper() .. who:sub(2)
+end
+
+local function limb_name(where)
+  if type(where) ~= "string" then return end
+  where = where:lower():match("^%s*(.-)%s*$"):gsub("%s+", " ")
+  where = short[where] or where
+  return limb_area[where] and where
+end
+
+-- Also invalidate a batch already being consumed if an event handler resets mid-prompt.
+local function cancel_pending(who, where)
+  local function cancel(hits)
+    if not hits then return end
+    for i = 1, #hits do
+      local hit = hits[i]
+      if (not who or hit.who == who) and (not where or hit.where == where) then
+        hit.cancelled = true
+      end
+    end
   end
-elseif not table.contains(svo.lc_classlist, svo.me.class) then
-    disableTrigger("svo Meta limbcounter")
-    disableTrigger("svo Sylvan limbcounter")
-		disableTrigger("svo Monk limbcounter")
-		disableTrigger("svo Burn limbcounter")
-		disableTrigger("svo Priest limbcounter")
-		disableTrigger("svo Magi limbcounter")
-		disableTrigger("svo earth Elemental Lord limbcounter")
-		disableTrigger("svo Dragon limbcounter")
-		disableTrigger("svo Knight limbcounter")
+  cancel(runtime.pending)
+  cancel(runtime.processing)
 end
 
-function svo.lc_smash()
-  hittable = {}
-  disableTrigger("svolc Don't register")
-  disableTrigger("svolc Don't register 2")
-  signals.before_prompt_processing:disconnect(sk.svo.lc_checklimbcounter)
+local function stop_cure(who)
+  local last = cures[who]
+  if not last then return end
+  cures[who] = nil
+  killTimer(last.timer)
 end
 
-function svo.lc_shikudocount(person, low, mid, high)
-	svo.lc_shikudoskill.highest = 1
-	svo.lc_shikudoskill.highest = string.format("%2.1f", svo.lc_shikudoskill.highest)
-	svo.lc_shikudoskill.highest = tonumber(svo.lc_shikudoskill.highest)
-	svo.lc_shikudoskill.middle = (high / mid)
-	svo.lc_shikudoskill.middle = string.format("%2.1f", svo.lc_shikudoskill.middle)
-	svo.lc_shikudoskill.middle = tonumber(svo.lc_shikudoskill.middle) 
-	svo.lc_shikudoskill.lowest = (high / low)
-	svo.lc_shikudoskill.lowest = string.format("%2.1f", svo.lc_shikudoskill.lowest)
-	svo.lc_shikudoskill.lowest = tonumber(svo.lc_shikudoskill.lowest)
-	svo.lc_sethitsneeded(person, high)
-end
-	
-function svo.lc_appliedreset(part, person)
-	if table.contains(svo.lc_list, person) then
-		echo("\n") svo.echof("Checking reset status")
-		if part == "legs" then
-			if svo.lc_list[person]["leftleg"] >= svo.lc_break_at then
-				tempTimer(4, [[svo.lc_reset("ll"); svo.lc_limbreset = false]])
-			elseif svo.lc_list[person]["rightleg"] >= svo.lc_break_at then
-				tempTimer(4, [[svo.lc_reset("rl"); svo.lc_limbreset = false]])
-			else
-				echo("\n") svo.echof("Ignoring Cure")
-			end
-		elseif part == "arms" then
-			if svo.lc_list[person]["leftarm"] >= svo.lc_break_at then
-				tempTimer(4, [[svo.lc_reset("la"); svo.lc_limbreset = false]])
-			elseif svo.lc_list[person]["rightarm"] >= svo.lc_break_at then
-				tempTimer(4, [[svo.lc_reset("ra"); svo.lc_limbreset = false]])
-			else
-				echo("\n") svo.echof("Ignoring Cure")
-			end
-		elseif part == "torso" then
-			if svo.lc_list[person]["torso"] >= svo.lc_break_at then
-				tempTimer(4, [[svo.lc_reset("t"); svo.lc_limbreset = false]])
-			else
-				echo("\n") svo.echof("Ignoring Cure")
-			end
-		elseif part	== "head" then
-			if svo.lc_list[person]["head"] >= svo.lc_break_at then
-				tempTimer(4, [[svo.lc_reset("h"); svo.lc_limbreset = false]])
-			else
-				echo("\n") svo.echof("Ignoring Cure")
-			end
-		end
-	end
+local function blank()
+  return {head = 0, torso = 0, rightarm = 0, leftarm = 0, rightleg = 0, leftleg = 0}
 end
 
-local function get_other_prepped(t, limbhit)
+local function stop_forgetting(who, where)
+  local timers = forget[who]
+  local entry = timers and timers[where]
+  if not entry then return end
+  timers[where] = nil
+  killTimer(entry.timer)
+  if not next(timers) then forget[who] = nil end
+end
+
+local function forget_later(who, where)
+  local timers = forget[who]
+  stop_forgetting(who, where)
+  timers = timers or {}
+  forget[who] = timers
+  local entry = {}
+  timers[where] = entry
+  entry.timer = tempTimer(svo.lc_forget_after, function()
+    if forget[who] ~= timers or timers[where] ~= entry then return end
+    timers[where] = nil
+    if not next(timers) then forget[who] = nil end
+    runtime.expire(who, where)
+  end)
+end
+
+local function forget_person(who)
+  cancel_pending(who)
+  for i = 1, #limbs do stop_forgetting(who, limbs[i]) end
+  stop_cure(who)
+  lastdamage[who], svo.lc_list[who], levels[who] = nil, nil, nil
+end
+
+-- The limb's level, named with or without the space ("left leg", "leftleg").
+function svo.lc_level(who, where)
+  local t = levels[who]
+  return t and t[(where:gsub(" ", ""))] or 0
+end
+
+-- Damage on one limb, named the same way. A limb broken with no damage behind it reads as
+-- broken, so anything asking whether it's broken gets the right answer.
+function svo.lc_damage(who, where)
+  local t = svo.lc_list[who]
+  if not t then return 0 end
+  local damage = t[(where:gsub(" ", ""))] or 0
+  return svo.lc_level(who, where) == 1 and svo.lc_break_at or damage
+end
+
+-- One more hit the size of the last one would break it.
+function svo.lc_prepped(who, where)
+  local damage = svo.lc_damage(who, where)
+  return damage < svo.lc_break_at and damage + (lastdamage[who] or 0) >= svo.lc_break_at
+end
+
+local function blank_limb(who, where)
+  svo.lc_list[who][where] = 0
+  if levels[who] then levels[who][where] = 0 end
+  stop_forgetting(who, where)
+end
+
+runtime.expire = function(who, where)
+  if not svo.lc_list[who] then return end
+  blank_limb(who, where)
+  raiseEvent("svo limbcounter reset")
+end
+
+local function clear_limb(who, where)
+  cancel_pending(who, where)
+  local last = cures[who]
+  local area = limb_area[where]
+  if last and (last.area == area or (area == "torso" and last.area == "body")) then
+    stop_cure(who)
+  end
+  stop_forgetting(who, where)
+  if svo.lc_list[who] then blank_limb(who, where) end
+end
+
+function svo.lc_clearlimb(who, where)
+  who, where = player_name(who), limb_name(where)
+  if not who or not where then return end
+  clear_limb(who, where)
+  raiseEvent("svo limbcounter reset")
+end
+
+local function get_other_prepped(who, limbhit)
   local s = {}
   for i = 1, #limbs do
-    if limbs[i] ~= limbhit and t[limbs[i]] == svo.lc_prep_at then
+    if limbs[i] ~= limbhit and svo.lc_prepped(who, limbs[i]) then
       s[#s + 1] = limbs[i]
     end
   end
   if #s == 0 then
     return ""
+  end
+  return string.format(" Their %s %s also prepped.", svo.concatand(s), (#s == 1 and 'is' or 'are'))
+end
+
+local function record(hit)
+  local who, where = hit.who, hit.where
+  svo.lc_list[who] = svo.lc_list[who] or blank()
+  levels[who] = levels[who] or blank()
+  local t = svo.lc_list[who]
+  local amount, level = hit.amount, hit.level
+  if level then
+    level = math.min(math.max(levels[who][where] + 1, level), 3)
+    amount = math.max((level - 1) * svo.lc_break_at - t[where], 0)
   else
-    return
-      string.format(" Their %s %s also prepped.", svo.concatand(s), (#s == 1 and 'is' or 'are'))
+    lastdamage[who] = amount
+  end
+  -- the game reports tenths, so don't let float drift decide a break
+  t[where] = math.floor((t[where] + amount) * 10 + 0.5) / 10
+  local reached = t[where] >= svo.lc_break_at and math.min(math.floor(t[where] / svo.lc_break_at) + 1, 3) or 0
+  levels[who][where] = math.max(levels[who][where], reached, level or 0)
+  svo.lc_lasthit = who
+  forget_later(who, where)
+  raiseEvent("svo limbcounter hit", who, where, amount)
+  if hit.cancelled then return end
+
+  local others = get_other_prepped(who, where)
+  local damage, level = t[where], levels[who][where]
+  local stage = level > 0 and string.format(" [L%d]", level) or ""
+  if level > 0 or damage >= svo.lc_break_at then
+    svo.echof("%s's %s is broken at %g%%%s.%s", who, where, damage, stage, others)
+  elseif svo.lc_prepped(who, where) then
+    svo.echof("%s's %s is prepped at %g%%%s.%s", who, where, damage, stage, others)
+  else
+    svo.echof("%s's %s is now at %g%%%s.%s", who, where, damage, stage, others)
   end
 end
 
-function svo.lc_priestdamage()
-	if svo.lc_priestdamage == false then
-		svo.lc_priestdamage = true
-	else
-		svo.lc_priestdamage = false
-	end
-end		
-
-function svo.lc_shikudodamagecheck(limb)
-	if limb == nil then
-		svo.lc_shikudodamage = "none"
-	else
-		svo.lc_shikudodamage = limb
-	end
-end
-
+-- Hits wait for the prompt. An illusion can print a damage line, but it can't spend
+-- your balance, and GMCP reports that. Being on both balances means no attack ran, so
+-- this works for an attack however it went out, where requiring the [System] queue
+-- line would miss anything sent with do, a balance hook or by hand.
 function svo.lc_checklimbcounter()
-  -- make the announces work with a singleprompt
-  local echof = svo.itf
+  if #runtime.pending == 0 then return end
+  local hits = runtime.pending
+  runtime.pending = {}
+  if svo.newbals.balance and svo.newbals.equilibrium then return end
+
+  runtime.processing = hits
   moveCursor(0, getLineNumber())
-  -- we'll only ever have one name here so far
-  local s, m =
-    pcall(
-      function()
-        local who, t = next(hittable)
-        local where
-        for i = 1, #t do
-          local dmg
-          where, dmg = next(t[i])
-          svo.lc_list[who][where] = svo.lc_list[who][where] + dmg
-          raiseEvent("svo limbcounter hit", who, where)
-					
-            if not where then
-              svo.echof("Failed to connect.%s", get_other_prepped(svo.lc_list[who], ""))
-            else
-              if svo.lc_list[who][where] >= svo.lc_break_at then
-                svo.echof("%s's %s broke.%s", who, where, get_other_prepped(svo.lc_list[who], where))
-              elseif svo.lc_list[who][where] >= svo.lc_prep_at() then
-                svo.echof(
-                  "%s's %s is prepped.%s", who, where, get_other_prepped(svo.lc_list[who], where)
-                )
-              else
-                svo.echof(
-                  "%s's %s is now at %s/%s.%s",
-                  who,
-                  where,
-                  svo.lc_list[who][where],
-                  svo.lc_break_at,
-                  get_other_prepped(svo.lc_list[who], where)
-                )
-              end
-					end
-				end
-				svo.signals.before_prompt_processing:disconnect(svo.lc_checklimbcounter)
-      end
-    )
-  if not s then
-    echoLink("(e!)", [[echo([=[The problem was: ']] .. tostring(m) .. [[']=])]], 'Oy - there was a problem. Click on this link '
-         ..'and submit a bug report with what it says along with a copy/paste of what you saw.')
+  for i = 1, #hits do
+    if not hits[i].cancelled then record(hits[i]) end
   end
-  hittable = {}
-  disableTrigger("svolc Don't register")
-  disableTrigger("svolc Don't register 2")
+  runtime.processing = nil
 end
 
 function svo.lc_hit(who, where, howmuch)
-	local damage = howmuch
-  svo.lc_list[who] =
-    svo.lc_list[who] or {head = 0, torso = 0, rightarm = 0, leftarm = 0, rightleg = 0, leftleg = 0}
-  where = where:gsub(" ", "")
-  svo.lc_lasthit = who
-  hittable[who] = hittable[who] or {}
-  hittable[who][#hittable[who] + 1] = {[where] = (damage and damage or 1)}
-  enableTrigger("svolc Don't register")
-  enableTrigger("svolc Don't register 2")
-	svo.signals.before_prompt_processing:connect(svo.lc_checklimbcounter)
+  who, where = player_name(who), limb_name(where)
+  howmuch = tonumber(howmuch)
+  if not who or not where or not howmuch then return end
+  local pending = runtime.pending
+  pending[#pending + 1] = {who = who, where = where, amount = howmuch}
 end
 
-function svo.lc_shikudohit(who, where, group)
-	local damage = svo.lc_shikudoskill[group]
-	if svo.lc_shikudodamage == "none" then
-    svo.lc_list[who] =
-      svo.lc_list[who] or {head = 0, torso = 0, rightarm = 0, leftarm = 0, rightleg = 0, leftleg = 0}
-    where = where:gsub(" ", "")
-    svo.lc_lasthit = who
-    hittable[who] = hittable[who] or {}
-    hittable[who][#hittable[who] + 1] = {[where] = (damage and damage or 1)}
-		svo.signals.before_prompt_processing:connect(svo.lc_checklimbcounter)
-	elseif svo.lc_shikudodamage == where then
-		damage = (damage / 2)
-    svo.lc_list[who] =
-      svo.lc_list[who] or {head = 0, torso = 0, rightarm = 0, leftarm = 0, rightleg = 0, leftleg = 0}
-    where = where:gsub(" ", "")
-    svo.lc_lasthit = who
-    hittable[who] = hittable[who] or {}
-    hittable[who][#hittable[who] + 1] = {[where] = (damage and damage or 1)}
-		svo.signals.before_prompt_processing:connect(svo.lc_checklimbcounter)
-	end
+-- DEVASTATE prints no damage line. It breaks both limbs of the pair, at a level set by the
+-- fractures behind it, wrists for arms and tendons for legs: 2, 4 or 6 for levels 1, 2 and 3.
+-- Its line shows that level. A limb that was already broken goes a level past where it was,
+-- so a level 2 strike mangles a limb at level 2.
+-- Damage follows from the level: level 2 sits at 100 and level 3 at 200.
+function svo.lc_devastate(who, area, level)
+  who = player_name(who)
+  if not who or not devastated[area] then return end
+  local pending = runtime.pending
+  for _, where in ipairs(devastated[area]) do
+    pending[#pending + 1] = {who = who, where = where, level = level}
+  end
 end
 
-function svo.lc_ignore()
-  table.remove(select(2, next(hittable)))
-	disableTrigger("svolc Don't Register")
+-- Mending works at once, on the first limb in the area with no damage left to stop it.
+local function mend(who, area)
+  for _, where in ipairs(bones[area] or {}) do
+    if svo.lc_level(who, where) == 1 then
+      levels[who][where] = 0
+      raiseEvent("svo limbcounter reset")
+      return
+    end
+  end
+end
+
+-- Restoration lands on whichever limb in the area needs it by then, left before right, and
+-- takes one level off.
+local function restore(who, area)
+  for _, where in ipairs(salved[area]) do
+    local level = svo.lc_level(who, where)
+    if level == 2 and not bones[area] then
+      blank_limb(who, where)
+      raiseEvent("svo limbcounter reset")
+      return
+    elseif level >= 2 then
+      levels[who][where] = level - 1
+      svo.lc_list[who][where] = (level - 2) * svo.lc_break_at
+      raiseEvent("svo limbcounter reset")
+      return
+    end
+  end
+end
+runtime.restore = restore
+
+local function needs_restoration(who, area)
+  for _, where in ipairs(salved[area]) do
+    if svo.lc_level(who, where) >= 2 then return true end
+  end
+  return false
+end
+
+-- A salve line doesn't name the salve, but restoration holds the salve balance until it lands.
+-- So any salve before then means the last one wasn't restoration, and an area with nothing for
+-- restoration to do can only have been mending.
+function svo.lc_salve(who, area)
+  who = player_name(who)
+  if not who then return end
+  local last = cures[who]
+  if last then
+    stop_cure(who)
+    mend(who, last.area)
+  end
+  if not salved[area] then return end
+  if not needs_restoration(who, area) then
+    mend(who, area)
+    return
+  end
+  local entry = {area = area}
+  cures[who] = entry
+  entry.timer = tempTimer(svo.lc_cure_delay, function()
+    if cures[who] ~= entry then return end
+    cures[who] = nil
+    runtime.restore(who, area)
+  end)
 end
 
 function svo.lc_reset(whom)
-  local lasthit = svo.lc_lasthit
-  if whom then
-    whom = string.title(whom)
-  end
-  local t =
-    {h = 'head', t = 'torso', rl = 'rightleg', ll = 'leftleg', ra = 'rightarm', la = 'leftarm'}
-  if whom == 'All' then
-    svo.lc_list = {}
+  if whom == nil then whom = "" end
+  if type(whom) ~= "string" then return end
+  local command = whom:lower():match("^%s*(.-)%s*$"):gsub("%s+", " ")
+  local person, where
+  if command == "all" then
+    cancel_pending()
+    for who in pairs(forget) do forget_person(who) end
+    for who in pairs(cures) do forget_person(who) end
+    for who in pairs(svo.lc_list) do forget_person(who) end
+    for who in pairs(levels) do forget_person(who) end
+    for who in pairs(lastdamage) do forget_person(who) end
     svo.echof("Reset everyone's limb status.")
-  elseif not whom and svo.lc_lasthit then
-    svo.lc_list[lasthit] =
-      {head = 0, torso = 0, rightarm = 0, leftarm = 0, rightleg = 0, leftleg = 0, broke = 0}
-    svo.echof("Reset %s's limb status.", svo.lc_lasthit)
-  elseif t[whom:lower()] then
-    if not svo.lc_lasthit or not svo.lc_list[svo.lc_lasthit] then
-      svo.echof("Not keeping track of anyone yet to reset their limb.")
-    else
-      svo.lc_list[svo.lc_lasthit][t[whom:lower()]] = 0
-      svo.echof("Reset %s %s's status.", svo.lc_lasthit, t[whom:lower()])
-    end
-  elseif whom then
-    if svo.lc_list[whom] then
-      svo.lc_list[whom] = nil
-      svo.echof("Reset %s's limb status.", whom)
-    else
-      svo.echof("Weren't keeping track of %s anyway.", whom)
-    end
   else
-    svo.echof("Not keeping track of anyone to reset them anyway.")
+    where = limb_name(command)
+    if command == "" or where then
+      person = player_name(target)
+      if not person then
+        svo.echof("Select a valid current target to reset their limb status.")
+        return
+      end
+    else
+      local name, rest = command:match("^(%a+) (.+)$")
+      if name then
+        person, where = player_name(name), limb_name(rest)
+        if not where or name == "all" then person = nil end
+      else
+        person = player_name(command)
+      end
+      if not person then
+        svo.echof("Use nn [person] [limb], or nn all.")
+        return
+      end
+    end
+    if where then
+      clear_limb(person, where)
+      svo.echof("Reset %s %s's status.", person, where)
+    else
+      forget_person(person)
+      svo.echof("Reset %s's limb status.", person)
+    end
   end
   raiseEvent("svo limbcounter reset")
 end
 
+local function reading(who, where)
+  local damage = svo.lc_list[who][where] or 0
+  local level = svo.lc_level(who, where)
+  return string.format("%g%%", damage) .. (level > 0 and string.format(" [L%d]", level) or "")
+end
+
 function svo.lc_show()
-  if svo.defc.dragonform then
-    return
-  end
-  if svo.lc_list == {} then
-    svo.echof("limbcounter: Not keeping track of anyone yet.");
+  if not next(svo.lc_list) then
+    svo.echof("limbcounter: Not keeping track of anyone yet.")
     return
   end
   setFgColor(unpack(svo.getDefaultColorNums))
-  for person, limbt in pairs(svo.lc_list) do
+  for person in pairs(svo.lc_list) do
     echo("--- " .. person .. " ")
     fg('a_darkgrey')
     echoLink("(reset)", 'svo.lc_reset"' .. person .. '"', "Reset limb status for " .. person, true)
     setFgColor(unpack(svo.getDefaultColorNums))
-    echo(string.format(" -- prep at %s -- break at %s --", svo.lc_prep_at(), svo.lc_break_at))
-    echo(string.rep("-", (68 - #person - #tostring(svo.lc_prep_at()) - #tostring(svo.lc_break_at))))
+    echo(string.format(" -- breaks at %g%% ", svo.lc_break_at))
+    echo(string.rep("-", 72 - #person))
     echo("\n|")
     for i = 1, #limbs do
-      if limbt[limbs[i]] >= svo.lc_break_at - 1 then
-        fg('green')
-      end
-      echo(
-        string.format(
-          "%14s",
-          (
-            limbt[limbs[i]] >= svo.lc_break_at -
-            1 and
-            limbs[i] ..
-            " prep" or
-            limbs[i] ..
-            " " ..
-            limbt[limbs[i]]
-          )
-        )
-      )
-      if limbt[limbs[i]] >= svo.lc_break_at - 1 then
-        setFgColor(unpack(svo.getDefaultColorNums))
-      end
+      local where = limbs[i]
+      local ready = svo.lc_level(person, where) > 0 or svo.lc_prepped(person, where)
+      if ready then fg('a_red') end
+      echo(string.format("%14s", where .. " " .. reading(person, where)))
+      if ready then setFgColor(unpack(svo.getDefaultColorNums)) end
       echo("|")
     end
     echo("\n")
@@ -381,160 +400,56 @@ function svo.lc_show()
   echo(string.rep("-", 91))
 end
 
-function svo.lc_sethitsneeded(person, hits)
-  if not tonumber(hits) then
-    echof("At how many hits do you want to set the breaking point at?")
-    return
-  end
-  svo.lc_break_at = hits
-  if person then
-    person = string.title(person)
-    svo.lc_list[person] =
-      svo.lc_list[person] or
-      {head = 0, torso = 0, rightarm = 0, leftarm = 0, rightleg = 0, leftleg = 0, broke = hits}
-    svo.lc_list[person].broke = hits
-    svo.echof("Set the breaking point for %s at %s.", person, hits)
-    for i = 1, #limbs do
-      if svo.lc_list[person][limbs[i]] > hits then
-        svo.lc_list[person][limbs[i]] = 0
-        svo.echof("Reset %s's %s limb (it's over hits needed).", person, limbs[i])
-        raiseEvent("svo limb reset", svo.lc_list[person], limbs[i])
-      end
-    end
-  elseif lc_lasthit and svo.lc_list[lc_lasthit] then
-    svo.lc_list[lc_lasthit].broke = svo.lc_break_at
-    echof("Set the breaking point for %s at %s.", lc_lasthit, svo.lc_break_at)
-    for i = 1, #limbs do
-      if svo.lc_list[lc_lasthit][limbs[i]] > hits then
-        svo.lc_list[person][limbs[i]] = 0
-        echof("Reset %s's %s limb (it's over hits needed).", lc_lasthit, limbs[i])
-        raiseEvent("svo limb reset", svo.lc_list[person], limbs[i])
-      end
-    end
-  else
-    svo.lc_break_at = tonumber(hits)
-    svo.echof("Set the breaking points for future targets at %s.", svo.lc_break_at)
-  end
-end
-
-function svo.lc_synchits()
-  if not lc_lasthit or not svo.lc_list[lc_lasthit] then
-    svo.echof("Not tracking anybody to sync their hits.")
-    return
-  end
-  local t = svo.lc_list[lc_lasthit]
-  local highestnum = 0
-  for i = 1, #limbs do
-    if t[limbs[i]] > highestnum then
-      highestnum = t[limbs[i]]
-    end
-  end
-  t.svo.lc_break_at = highestnum
-  echof("Set %s's breakpoint at %s.", lc_lasthit, highestnum)
-  for i = 1, #limbs do
-    if t[limbs[i]] >= highestnum then
-      t[limbs[i]] = 0;
-      svo.echof("Reset %s - it was over the hits needed.", limbs[i])
-    end
-  end
-end
-
-svo.config.setoption(
-  "weapon",
-  {
-    type = "string",
-    onset =
-      function()
-        svo.echof(
-          "Setting your weapon to %s",
-          svo.conf.weapon,
-          (svo.conf.weaon == "none" and '' or 's')
-        )
-      end,
-  }
-)
-
-svo.conf.limbprep = svo.conf.limbprep or 1
 -- limbcounters prompt tag is defined here
 -- feel free to tinker with it, but move it out into a script of its own,
 -- so your changes don't get erased on an update!
 
+local function tag_colour(who, where)
+  local ready = svo.lc_level(who, where) > 0 or svo.lc_prepped(who, where)
+  return ready and "<a_red>" or "<a_darkyellow>"
+end
 
+-- Show only the selected opponent, and keep UI readings separate from the combat accessor.
+local function readings()
+  local who = player_name(target)
+  return who, who and svo.lc_list[who]
+end
 
 function svo.lc_prompttag2()
-  if not svo.lc_lasthit or not svo.lc_list or not svo.lc_list[svo.lc_lasthit] then
-    return ""
-  end
-  local t = svo.lc_list[svo.lc_lasthit]
-  return
-    string.format(
-      "%s: h %s|t %s|ra %s|la %s|rl %s|ll %s",
-      svo.lc_lasthit,
-      t.head,
-      t.torso,
-      t.rightarm,
-      t.leftarm,
-      t.rightleg,
-      t.leftleg
-    )
+  local who, t = readings()
+  if not t then return "" end
+  return string.format("%s: h %s|t %s|ra %s|la %s|rl %s|ll %s", who,
+    reading(who, 'head'), reading(who, 'torso'), reading(who, 'rightarm'), reading(who, 'leftarm'),
+    reading(who, 'rightleg'), reading(who, 'leftleg'))
 end
 
 svo.adddefinition("@lc_prompttag2", "svo.lc_prompttag2()")
 
 function svo.lc_prompttag()
-  if
-    svo.defc.dragonform or not svo.lc_lasthit or table.contains(svo.lc_list, svo.me.class) or not svo.lc_list[svo.lc_lasthit]
-  then
-    return ""
-  end
-  local t = svo.lc_list[svo.lc_lasthit]
-  local prep = 1
-  return
-    string.format(
-      "%s%s<a_white>/%s%s<a_white>|%s%s<a_white>/%s%s<a_white>|%s%s<a_white>/%s%s<a_white>|%s",
-      ((svo.lc_break_at - t.leftarm) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.leftarm,
-      ((svo.lc_break_at - t.rightarm) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.rightarm,
-      ((svo.lc_break_at - t.leftleg) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.leftleg,
-      ((svo.lc_break_at - t.rightleg) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.rightleg,
-      ((svo.lc_break_at - t.head) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.head,
-      ((svo.lc_break_at - t.torso) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.torso,
-      svo.lc_break_at
-    )
+  local who, t = readings()
+  if not t then return "" end
+  return string.format("%s%s<a_white>/%s%s<a_white>|%s%s<a_white>/%s%s<a_white>|%s%s<a_white>/%s%s<a_white>|%g",
+    tag_colour(who, 'leftarm'), reading(who, 'leftarm'), tag_colour(who, 'rightarm'), reading(who, 'rightarm'),
+    tag_colour(who, 'leftleg'), reading(who, 'leftleg'), tag_colour(who, 'rightleg'), reading(who, 'rightleg'),
+    tag_colour(who, 'head'), reading(who, 'head'), tag_colour(who, 'torso'), reading(who, 'torso'), svo.lc_break_at)
 end
 
 svo.adddefinition("@lc_prompttag", "svo.lc_prompttag()")
 
 function svo.lc_prompttag3()
-  if not svo.lc_lasthit or not svo.lc_list or not svo.lc_list[svo.lc_lasthit] then
-    return ""
-  end
-  local t = svo.lc_list[svo.lc_lasthit]
-  local prep = 1
-  return
-    string.format(
-      "<a_darkgrey>(%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s)",
-      ((svo.lc_break_at - t.leftarm) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.leftarm,
-      ((svo.lc_break_at - t.rightarm) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.rightarm,
-      ((svo.lc_break_at - t.leftleg) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.leftleg,
-      ((svo.lc_break_at - t.rightleg) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.rightleg,
-      ((svo.lc_break_at - t.head) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.head,
-      ((svo.lc_break_at - t.torso) <= prep) and "<a_red>" or "<a_darkyellow>",
-      t.torso,
-      svo.lc_break_at
-    )
+  local who, t = readings()
+  if not t then return "" end
+  return string.format(
+    "<a_darkgrey>(%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%s%s<a_darkgrey>:%g)",
+    tag_colour(who, 'leftarm'), reading(who, 'leftarm'), tag_colour(who, 'rightarm'), reading(who, 'rightarm'),
+    tag_colour(who, 'leftleg'), reading(who, 'leftleg'), tag_colour(who, 'rightleg'), reading(who, 'rightleg'),
+    tag_colour(who, 'head'), reading(who, 'head'), tag_colour(who, 'torso'), reading(who, 'torso'), svo.lc_break_at)
 end
 
 svo.adddefinition("@lc_prompttag3", "svo.lc_prompttag3()")
+
+-- Reuse one named signal owner, resolving the current implementation after each reload.
+runtime.check = runtime.check or function() svo.lc_checklimbcounter() end
+svo.signals.before_prompt_processing:connect(runtime.check, "svo.lc_checklimbcounter")
 end
 if svo.systemloaded then svo.loader.limbcounter() end

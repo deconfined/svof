@@ -25,7 +25,7 @@ on:
     # The syntax and call-site gates used to run on every push, from
     # check-syntax.yml. Folding them in here narrowed that to one branch, which
     # left master and in-client-svof with no check at all.
-    branches: [svof-muddler, in-client-svof, master]
+    branches: [svof-muddler, in-client-svof, master, percent-limb-tracker]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -351,6 +351,28 @@ jobs:
       - name: test timed waits
         run: lua tools/test_timed_waits.lua
 
+      # Native NPC onset lines use the real loaders and shipped trigger
+      # scripts: no attack-balance gate, independent flag or hunting timer.
+      - name: test native NPC stun coverage
+        run: lua tools/test_npc_stun.lua
+
+      - name: test native priority, queue, parry, prompt and discovery regressions
+        run: |
+          lua tools/test_priority_delivery.lua
+          lua tools/test_do_undo.lua
+          lua tools/test_parry_policy.lua
+          lua tools/test_prompt_literals.lua
+          lua tools/test_skill_discovery.lua
+
+      - name: install PCRE2 passive-observer verification runtime
+        run: sudo apt-get update && sudo apt-get install --yes libpcre2-8-0
+
+      - name: test passive priority feedback and native warning replay
+        run: |
+          lua tools/test_priority_feedback.lua
+          lua tools/test_warning_replay.lua
+          python3 tools/test_passive_observations.py --lua lua
+
       # Gate 1.992. Writhes and serverside: roped's game name, daeggerimpale's
       # entry, triggers, serverside defaults and priorities, and that every
       # line of the curing code that holds back for an impale holds back for
@@ -363,6 +385,11 @@ jobs:
       # homunculusmercury is svof's swellskin. Read from the real sources.
       - name: test affliction names
         run: lua tools/test_affliction_names.lua
+
+      # Gate 1.995. The limb counter on the real signals and timers: damage from
+      # the game's percentages, the off-balance check, forgetting and cures.
+      - name: test limb counter
+        run: lua tools/test_limbcounter.lua
 
       - uses: actions/setup-java@v4
         with:
@@ -470,6 +497,13 @@ jobs:
           sudo apt-get -y install expat
           luarocks install luafilesystem
           luarocks install luaexpat
+      - name: install real NameDB test providers
+        run: |
+          sudo apt-get -y install libsqlite3-dev libyajl-dev
+          luarocks install luasql-sqlite3 2.6.0-2
+          luarocks install lua-yajl 2.1-0
+      - name: test native HTTP NameDB authority and lifecycle
+        run: lua tools/test_namedb.lua
       - name: check reference xml syntax
         run: lua validate-syntax.lua .
 

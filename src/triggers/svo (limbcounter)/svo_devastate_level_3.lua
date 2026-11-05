@@ -1,0 +1,1 @@
+svo.lc_devastate(matches[3], matches[2], 3)

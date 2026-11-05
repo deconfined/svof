@@ -1,207 +1,106 @@
-ndb.schema = {
-  people = {
-    name          = "",
-    title         = "",
-    gender        = "",
-    class         = "",
-    city          = "",
-    city_rank     = 0,
-    city_soldier  = -1, -- -1 default, 0 no, -2 yes
-    guild         = "",
-    might         = -1, -- 0 is a possible might, -1 unknown
-    importance    = 0,
-    xp_rank       = -1, -- -1 default, -2 unranked
-    level         = -1, -- -1 default (unknown)
-    immortal      = 0,
-    iff           = -1, -- -1 autodetected, 1 enemy, 2 ally
-    cityenemy     = 0, -- 0 is not enemy, 1 is enemy
-    orderenemy    = 0, -- 0 is not enemy, 1 is enemy
-    houseenemy    = 0, -- 0 is not enemy, 1 is enemy
-    order         = "",
-    notes         = "",
-    dragon        = 0,
-    mark          = "", -- contributed by Veldrin
-    race          = "",
-    combat_rank   = -1, -- -1 default, 0 no rank, > 0 yes
-    combat_rating = -1, -- -1 default, 0 no rating, > 0 yes
-    birth_day     = 0, -- 0 default, > 0 yes
-    birth_month   = 0, -- 0 default, > 0 yes
-    birth_year    = 0, -- 0 default, > 0 yes
-    birth_hidden  = -1, -- -1 default, 0 not hidden, 1 hidden
-    arms          = "",
-    divorces      = 0, -- 0 default,
-    motto         = "",
-    warcry        = "",
-    infamous      = -1, -- -1 default, 0 not infamous, 1 nearly, 2-7 infamous 
-
-    _unique     = {"name"},
-    _violations = "REPLACE"
-  },
+-- Identity facts belong exclusively to the official character API. Personal
+-- policies and annotations are deliberately outside this set.
+ndb.fact_defaults = {
+  title = "", gender = "", class = "", city = "", city_rank = 0,
+  city_soldier = -1, guild = "", might = -1, xp_rank = -1, level = -1,
+  immortal = -1, order = "", dragon = -1, mark = "", race = "",
+  combat_rank = -1, combat_rating = -1, birth_day = 0, birth_month = 0,
+  birth_year = 0, birth_hidden = -1, arms = "", divorces = -1,
+  motto = "", warcry = "", infamous = -1, api_verified = 0, api_updated = 0,
+  mob_kills = "", player_kills = -1, explorer_rank = -1,
 }
+ndb.policy_fields = { notes = true, iff = true, importance = true,
+  cityenemy = true, orderenemy = true, houseenemy = true }
+ndb.schema = { people = { name = "", importance = 0, iff = -1,
+  cityenemy = 0, orderenemy = 0, houseenemy = 0, notes = "",
+  _unique = {"name"}, _violations = "FAIL" } }
+for key, value in pairs(ndb.fact_defaults) do ndb.schema.people[key] = value end
+
+local function ident(value) return '"' .. value:gsub('"', '""') .. '"' end
+local function literal(value)
+  if type(value) == "number" then return tostring(value) end
+  return "'" .. value:gsub("'", "''") .. "'"
+end
+ndb.sql_literal = literal
+
+function ndb.transaction(fn)
+  local conn = db.__conn.namedb
+  local ok, result = pcall(fn, conn)
+  if ok then
+    local committed, err = conn:commit()
+    if committed then return true, result end
+    result = err or "commit failed"
+  end
+  conn:rollback()
+  return nil, result
+end
 
 function ndb.init()
-  ndb.db = db:create("NameDB", ndb.schema)
-  -- necessary on Windows, because its IO tends to... slow down with time.
-  -- http://www.sqlite.org/pragma.html#pragma_synchronous
-  db.__conn["namedb"]:execute("pragma synchronous = OFF")
-
-  -- automigration by db: doesn't work anymore because LuaSQL bugs out on the pragma statement
-  -- so if there was any data at all in the db, see if any of it needs to be added
-
-  local test = db:fetch(ndb.db.people)
-  if next(test) then
-    local _,someperson = next(test)
-    
-    if someperson.order == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "order" TEXT NULL DEFAULT ""]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons order.\n")
+  ndb.authority_ready = false
+  -- Open without handing db:_migrate an incomplete schema: its redundant-column
+  -- path rebuilds tables. Add missing columns only, preserving custom schema,
+  -- indexes, triggers, row IDs and all personal data, even on an empty old DB.
+  local previous = db.__schema.namedb
+  db:create("NameDB", {})
+  if previous then db.__schema.namedb = previous end
+  local conn = db.__conn.namedb
+  local columns = {}
+  local cursor = assert(conn:execute("PRAGMA table_info(people)"))
+  local row = cursor:fetch({}, "a")
+  while row do columns[row.name] = row.type; row = cursor:fetch({}, "a") end
+  cursor:close()
+  local ok, err = ndb.transaction(function(c)
+    if not next(columns) then
+      assert(c:execute('CREATE TABLE people (_row_id INTEGER PRIMARY KEY AUTOINCREMENT)'))
     end
-
-    if someperson.race == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "race" TEXT NULL DEFAULT ""]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons race.\n")
+    for key, value in pairs(ndb.schema.people) do
+      if key:sub(1, 1) ~= "_" and not columns[key] then
+        assert(c:execute('ALTER TABLE people ADD COLUMN ' .. ident(key) ..
+          (type(value) == "number" and ' REAL' or ' TEXT') .. ' DEFAULT ' .. literal(value)))
+      end
     end
-
-    if someperson.dragon == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "dragon" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to see if a person is a dragon.\n")
-    end
-
-    if someperson.mark == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "mark" TEXT NULL DEFAULT ""]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to see if a person is a mark.\n")
-    end
-
-    if someperson.combat_rank == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "combat_rank" REAL NULL DEFAULT -1]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the person combat rank.\n")
-    end
-
-    if someperson.combat_rating == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "combat_rating" REAL NULL DEFAULT -1]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons combat rating.\n")
-    end
-
-    if someperson.city_soldier == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "city_soldier" REAL NULL DEFAULT -1]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to see if a person is a city soldier.\n")
-    end
-
-    if someperson.birth_day == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "birth_day" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons birth day.\n")
-    end
-
-    if someperson.birth_month == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "birth_month" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons birth month.\n")
-    end
-
-    if someperson.birth_year == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "birth_year" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons birth year.\n")
-    end
-
-    if someperson.birth_hidden == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "birth_hidden" REAL NULL DEFAULT -1]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to see if a person has a hidden birthdate.\n")
-    end
-
-    if someperson.arms == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "arms" TEXT NULL DEFAULT ""]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons arms.\n")
-    end
-
-    if someperson.divorces == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "divorces" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to see how many divorces a person has had.\n")
-    end
-
-    if someperson.infamous == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "infamous" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to track Infamous people.\n")
-    end
-
-    if someperson.motto == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "motto" TEXT NULL DEFAULT ""]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons motto.\n")
-    end
-
-    if someperson.warcry == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "warcry" TEXT NULL DEFAULT ""]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field for the persons warcry.\n")
-    end
-
-    if someperson.level == nil then
-      local conn = db.__conn.namedb
-      local sql_add = [[ALTER TABLE people ADD COLUMN "level" REAL NULL DEFAULT 0]]
-      conn:execute(sql_add)
-      conn:commit()
-      cecho("(namedb): upgraded your database to have a field to track a persons level.\n")
+    assert(c:execute('CREATE UNIQUE INDEX IF NOT EXISTS namedb_http_people_name ON people(name)'))
+    assert(c:execute('CREATE TABLE IF NOT EXISTS namedb_authority (version INTEGER NOT NULL)'))
+  end)
+  assert(ok, err)
+  -- Register a native Mudlet sheet without invoking its destructive redundant-
+  -- column migration. Include custom columns solely for native fetch coercion.
+  local registered = {columns = {}, options = {_unique = {"name"}, _violations = "FAIL"}}
+  local old_people = previous and previous.people
+  for key, value in pairs(old_people and old_people.options or {}) do
+    if key ~= "_unique" and key ~= "_violations" then registered.options[key] = value end
+  end
+  for key, value in pairs(ndb.schema.people) do
+    if key:sub(1, 1) ~= "_" then registered.columns[key] = value end
+  end
+  for key, kind in pairs(columns) do
+    if key ~= "_row_id" and registered.columns[key] == nil then
+      local numeric = kind:upper():find("INT") or kind:upper():find("REAL") or kind:upper():find("NUM")
+      local old_default = old_people and old_people.columns[key]
+      if old_default ~= nil then registered.columns[key] = old_default
+      else registered.columns[key] = numeric and 0 or "" end
     end
   end
-
-  -- shuffle Shallamese into Targossas
-  local c = #(db:fetch(ndb.db.people, db:eq(ndb.db.people.city, "Shallam")))
-  if c ~= 0 then
-    -- wait for ndb.fixed_set to be loaded
-    tempTimer(0, [[ndb.fixed_set(ndb.db.people.city, "Targossas", db:eq(ndb.db.people.city, "Shallam")); svo.echof("Migrated ]]..c..[[ Shallamese to be called Targossians now.")]])
-  end
-
-   tempTimer(0, function()
-     -- fix up knowns to go into rogue
-     ndb.fixed_set(ndb.db.people.city, "rogue", db:eq(ndb.db.people.city, "(none)"))
-     ndb.fixed_set(ndb.db.people.city, "rogue", db:eq(ndb.db.people.city, "none"))
-     ndb.fixed_set(ndb.db.people.city, "rogue", db:eq(ndb.db.people.city, ""))
-   end)
+  db.__schema.namedb.people = registered
+  ndb.db = db:get_database("NameDB")
+  local reset = false
+  ok, err = ndb.transaction(function(c)
+    local versions = assert(c:execute('SELECT version FROM namedb_authority'))
+    local current = versions:fetch({}, "a")
+    versions:close()
+    if current and tonumber(current.version) >= 1 then return end
+    local assignments = {}
+    for key, value in pairs(ndb.fact_defaults) do
+      assignments[#assignments + 1] = ident(key) .. '=' .. literal(value)
+    end
+    assert(c:execute('UPDATE people SET ' .. table.concat(assignments, ',')))
+    assert(c:execute('DELETE FROM namedb_authority'))
+    assert(c:execute('INSERT INTO namedb_authority(version) VALUES(1)'))
+    reset = true
+  end)
+  assert(ok, err)
+  ndb.authority_ready = true
+  if reset then ndb.pending_facts_reset = true end
 end
 
 ndb.init()

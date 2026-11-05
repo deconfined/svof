@@ -1,1 +1,0 @@
-svo.lc_checkdamage = false

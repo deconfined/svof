@@ -1,4 +1,5 @@
 function ndb.fixed_set(field, value, query)
+   assert(ndb.policy_fields[field.name], "NameDB character facts are API-owned")
    local db_name = field.database
    local s_name = field.sheet
 

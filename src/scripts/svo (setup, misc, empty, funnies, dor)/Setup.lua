@@ -86,7 +86,9 @@ function svo.deepcopy(object)
       end
       local new_table = {}
       lookup_table[object] = new_table
-      for index, value in pairs(object) do
+      -- Copy storage, including OrderedMap's internal keys. Lua 5.2+ pairs
+      -- invokes __pairs and otherwise loses those keys in stun probe snapshots.
+      for index, value in next, object do
           new_table[_copy(index)] = _copy(value)
       end
       return setmetatable(new_table, getmetatable(object))
@@ -1921,8 +1923,6 @@ sk.priosbeforechange = sk.priosbeforechange or {}
 sk.priochangecache = sk.priochangecache or { special = {} }
 -- queue of commands to batch into a serverside alias for curing
 sk.sendqueue = sk.sendqueue or {}
-sk.affqueue = sk.affqueue or {}
-sk.defqueue = sk.defqueue or {}
 -- keep track of the length of the command - max command length in Achaea is 2048
 sk.sendqueuel = 18 -- 'setalias multicmd ' is 24 characters
 sk.achaea_command_max_length = 2048

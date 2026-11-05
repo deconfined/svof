@@ -1,1 +1,0 @@
-if ndb.gaghonours then deleteLine() end

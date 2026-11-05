@@ -1,1 +1,0 @@
-if not svo.inslowcuringmode() and svo.conf.gagserverside then svo.deleteLineP() end

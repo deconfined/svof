@@ -112,10 +112,6 @@
         "type": "exactMatch"
       },
       {
-        "pattern": "You will now cure using the normal set.",
-        "type": "exactMatch"
-      },
-      {
         "pattern": "Automatic sipping of healing elixirs activated.",
         "type": "exactMatch"
       },
@@ -194,7 +190,7 @@
     ]
   },
   {
-    "name": "slowcuring set switch",
+    "name": "Observed curing set",
     "isActive": "yes",
     "isFolder": "no",
     "multiline": "no",
@@ -206,8 +202,48 @@
     "highlightBG": "#ffff00",
     "patterns": [
       {
-        "pattern": "You will now cure using the slowcuring set.",
-        "type": "exactMatch"
+        "pattern": "^You will now cure using the (.+) set\\.$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Priority aff set",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "patterns": [
+      {
+        "pattern": "^Now prioritising the (.+) affliction\\.$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Priority aff clear",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "patterns": [
+      {
+        "pattern": "^No longer prioritising the (.+) affliction\\.$",
+        "type": "regex"
+      },
+      {
+        "pattern": "^\\[Curing\\]: No longer prioritising the (.+) affliction\\.$",
+        "type": "regex"
+      }
+    ]
+  },
+  {
+    "name": "Priority aff none",
+    "isActive": "yes",
+    "isFolder": "no",
+    "multiline": "no",
+    "patterns": [
+      {
+        "pattern": "^You do not have a priority aff at the moment\\.$",
+        "type": "regex"
       }
     ]
   },

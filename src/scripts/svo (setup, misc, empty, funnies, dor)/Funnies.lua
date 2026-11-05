@@ -84,7 +84,6 @@ svo.protips = {
   "If a name is on the map, you can gotop <name> to get to it",
   "With the peopletracker addon, you can just use 'gotop' to go to the last known location of the person in the 'target' variable",
   "hh quickly toggles between health and mana priority",
-  "Some limbcounters (not Svof's) reset when you apply a salve to a limb after an attack - if you know that's the case, you could trigger to randomly apply mending to a limb they just hit!",
   "You can make colour logs by selecting text, right-clicking and selecting 'copy to HTML'. Then paste it into pastehtml.com and share the link",
   "Find out which of your abilities are completely hidden in blackout - you can cause blackout by obtaining dust bombs and throwing them at the ground",
   "You can make your own echos colour schemes and select them with 'vshow colors'. See docs on how!",

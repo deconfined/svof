@@ -21,11 +21,10 @@ temp_name_list = {}
 for i,j in ipairs(ndb.templist) do
 	temp_name_list[#temp_name_list + 1] = {
 		name = j,
-		city = gmcp.Char.Status.city:match("^(%w+)")
 	}
 end
 
-db:merge_unique(ndb.db.people, temp_name_list)
+ndb.merge_discovery(temp_name_list)
 
 raiseEvent("NameDB got new data")
 

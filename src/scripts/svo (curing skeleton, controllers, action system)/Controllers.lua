@@ -745,21 +745,62 @@ svo.can_usemana = function()
 end
 
 
-svo.cnrl.warnids = {}
+-- Pending messages belong to lifevision's one warning claim, never a second
+-- queue. Its rejection discards the whole batch along with the other claims.
+cnrl.warningepoch = tonumber(cnrl.warningepoch) or 0
+cnrl.warningticket = cnrl.warningticket or 0
+svo.cnrl.warnids = svo.cnrl.warnids or {}
+
+function svo.cnrl.clearpendingwarnings()
+  -- Invalidate even claims parked outside lifevision by native checkstun.
+  cnrl.warningepoch = cnrl.warningepoch + 1
+  lifevision.l:set("givewarning_happened", nil)
+  if actions.givewarning_happened then svo.killaction(svo.dict.givewarning.happened) end
+end
+cnrl.clearpendingwarnings()
+
+function svo.cnrl.warningbatchvalid(batch)
+  local action = actions.givewarning_happened
+  return batch and batch.warningepoch == cnrl.warningepoch
+    and action and batch.actionid == action.warningid
+    and batch.actionid == cnrl.warningticket
+end
+
+if cnrl.warningdisconnecthandler then
+  killAnonymousEventHandler(cnrl.warningdisconnecthandler)
+end
+local disconnecthandler
+disconnecthandler = registerAnonymousEventHandler("sysDisconnectionEvent", function()
+  if cnrl.warningdisconnecthandler ~= disconnecthandler then return end
+  cnrl.clearpendingwarnings()
+end)
+cnrl.warningdisconnecthandler = disconnecthandler
+signals.relogin:connect(cnrl.clearpendingwarnings, "clear pending warnings")
+
+local function filewarning(tbl, lineguard)
+  svo.checkaction(svo.dict.givewarning.happened, true)
+  local action = actions.givewarning_happened
+  if not action.warningid or action.warningid ~= cnrl.warningticket then
+    cnrl.warningticket = cnrl.warningticket + 1
+    action.warningid = cnrl.warningticket
+  end
+  local claim = lifevision.l.givewarning_happened
+  local batch = claim and claim.arg
+  -- Scalar ownership survives native checkstun's independent deep copies.
+  -- The latest ticket also rejects a parked action restored over its successor.
+  if not cnrl.warningbatchvalid(batch) then
+    batch = {warningepoch = cnrl.warningepoch, actionid = action.warningid, warnings = {}}
+  end
+  batch.warnings[#batch.warnings + 1] = tbl
+  lifevision.add(action.p, nil, batch, lineguard)
+end
 
 -- tbl: {initialmsg = "", prefixwarning = "", startin = 0, duration = 0}
 function svo.givewarning(tbl)
-  svo.checkaction(svo.dict.givewarning.happened, true)
-
-  if conf.aillusion then
-    lifevision.add(actions.givewarning_happened.p, nil, tbl, 1)
-  else
-    lifevision.add(actions.givewarning_happened.p, nil, tbl)
-  end
+  filewarning(tbl, conf.aillusion and 1 or nil)
 end
 function svo.givewarning_multi(tbl)
-  svo.checkaction(svo.dict.givewarning.happened, true)
-  lifevision.add(actions.givewarning_happened.p, nil, tbl)
+  filewarning(tbl)
 end
 
 svo.prefixwarning = function ()
